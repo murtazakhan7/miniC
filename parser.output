@@ -1,0 +1,4088 @@
+State 218 conflicts: 1 shift/reduce
+
+
+Grammar
+
+    0 $accept: program $end
+
+    1 program: translation_unit
+
+    2 translation_unit: ε
+    3                 | translation_unit declaration
+
+    4 declaration: function_def
+    5            | var_decl
+    6            | struct_decl
+
+    7 type_spec: KW_INT
+    8          | KW_FLOAT
+    9          | KW_CHAR
+   10          | KW_BOOL
+   11          | KW_VOID
+   12          | KW_STRUCT IDENTIFIER
+
+   13 struct_decl: KW_STRUCT IDENTIFIER LBRACE declaration_list RBRACE SEMICOLON
+
+   14 declaration_list: ε
+   15                 | declaration_list var_decl
+
+   16 var_decl: type_spec IDENTIFIER SEMICOLON
+   17         | type_spec IDENTIFIER OP_ASSIGN init_opt SEMICOLON
+   18         | type_spec IDENTIFIER LBRACKET INT_LITERAL RBRACKET SEMICOLON
+   19         | type_spec IDENTIFIER LBRACKET INT_LITERAL RBRACKET OP_ASSIGN LBRACE arg_list RBRACE SEMICOLON
+
+   20 init_opt: expr
+
+   21 function_def: type_spec IDENTIFIER LPAREN param_list RPAREN compound_stmt
+
+   22 param_list: ε
+   23           | param_list_ne
+
+   24 param_list_ne: param
+   25              | param_list_ne COMMA param
+
+   26 param: type_spec IDENTIFIER
+   27      | type_spec IDENTIFIER LBRACKET RBRACKET
+
+   28 compound_stmt: LBRACE stmt_list RBRACE
+
+   29 stmt_list: ε
+   30          | stmt_list stmt
+
+   31 stmt: var_decl
+   32     | if_stmt
+   33     | while_stmt
+   34     | do_while_stmt
+   35     | for_stmt
+   36     | return_stmt
+   37     | break_stmt
+   38     | continue_stmt
+   39     | compound_stmt
+   40     | expr_stmt
+   41     | SEMICOLON
+
+   42 if_stmt: KW_IF LPAREN expr RPAREN stmt
+   43        | KW_IF LPAREN expr RPAREN stmt KW_ELSE stmt
+
+   44 while_stmt: KW_WHILE LPAREN expr RPAREN stmt
+
+   45 do_while_stmt: KW_DO stmt KW_WHILE LPAREN expr RPAREN SEMICOLON
+
+   46 for_stmt: KW_FOR LPAREN for_init SEMICOLON for_cond SEMICOLON for_incr RPAREN stmt
+
+   47 for_init: type_spec IDENTIFIER OP_ASSIGN expr
+   48         | expr
+   49         | ε
+
+   50 for_cond: expr
+   51         | ε
+
+   52 for_incr: expr
+   53         | ε
+
+   54 return_stmt: KW_RETURN expr SEMICOLON
+   55            | KW_RETURN SEMICOLON
+
+   56 break_stmt: KW_BREAK SEMICOLON
+
+   57 continue_stmt: KW_CONTINUE SEMICOLON
+
+   58 expr_stmt: expr SEMICOLON
+
+   59 expr: assign_expr
+
+   60 assign_expr: ternary_expr
+   61            | unary_expr OP_ASSIGN assign_expr
+   62            | unary_expr OP_PLUS_ASSIGN assign_expr
+   63            | unary_expr OP_MINUS_ASSIGN assign_expr
+   64            | unary_expr OP_MUL_ASSIGN assign_expr
+   65            | unary_expr OP_DIV_ASSIGN assign_expr
+   66            | unary_expr OP_MOD_ASSIGN assign_expr
+   67            | unary_expr OP_AND_ASSIGN assign_expr
+   68            | unary_expr OP_OR_ASSIGN assign_expr
+   69            | unary_expr OP_XOR_ASSIGN assign_expr
+   70            | unary_expr OP_LSHIFT_ASSIGN assign_expr
+   71            | unary_expr OP_RSHIFT_ASSIGN assign_expr
+
+   72 ternary_expr: or_expr
+   73             | or_expr QUESTION expr COLON ternary_expr
+
+   74 or_expr: and_expr
+   75        | or_expr OP_OR and_expr
+
+   76 and_expr: bitor_expr
+   77         | and_expr OP_AND bitor_expr
+
+   78 bitor_expr: bitxor_expr
+   79           | bitor_expr OP_BITOR bitxor_expr
+
+   80 bitxor_expr: bitand_expr
+   81            | bitxor_expr OP_BITXOR bitand_expr
+
+   82 bitand_expr: eq_expr
+   83            | bitand_expr OP_BITAND eq_expr
+
+   84 eq_expr: rel_expr
+   85        | eq_expr OP_EQ rel_expr
+   86        | eq_expr OP_NEQ rel_expr
+
+   87 rel_expr: shift_expr
+   88         | rel_expr OP_LT shift_expr
+   89         | rel_expr OP_GT shift_expr
+   90         | rel_expr OP_LEQ shift_expr
+   91         | rel_expr OP_GEQ shift_expr
+
+   92 shift_expr: add_expr
+   93           | shift_expr OP_LSHIFT add_expr
+   94           | shift_expr OP_RSHIFT add_expr
+
+   95 add_expr: mul_expr
+   96         | add_expr OP_PLUS mul_expr
+   97         | add_expr OP_MINUS mul_expr
+
+   98 mul_expr: unary_expr
+   99         | mul_expr OP_MUL unary_expr
+  100         | mul_expr OP_DIV unary_expr
+  101         | mul_expr OP_MOD unary_expr
+
+  102 unary_expr: postfix_expr
+  103           | OP_MINUS unary_expr
+  104           | OP_NOT unary_expr
+  105           | OP_BITNOT unary_expr
+  106           | OP_INC unary_expr
+  107           | OP_DEC unary_expr
+  108           | OP_BITAND unary_expr
+  109           | OP_MUL unary_expr
+  110           | LPAREN type_spec RPAREN unary_expr
+
+  111 postfix_expr: primary_expr
+  112             | postfix_expr LBRACKET expr RBRACKET
+  113             | postfix_expr LPAREN arg_list RPAREN
+  114             | postfix_expr OP_DOT IDENTIFIER
+  115             | postfix_expr OP_ARROW IDENTIFIER
+  116             | postfix_expr OP_INC
+  117             | postfix_expr OP_DEC
+
+  118 primary_expr: INT_LITERAL
+  119             | FLOAT_LITERAL
+  120             | CHAR_LITERAL
+  121             | STR_LITERAL
+  122             | BOOL_LITERAL
+  123             | IDENTIFIER
+  124             | KW_PRINTF
+  125             | KW_SCANF
+  126             | LPAREN expr RPAREN
+
+  127 arg_list: ε
+  128         | arg_list_ne
+
+  129 arg_list_ne: expr
+  130            | arg_list_ne COMMA expr
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256)
+    KW_INT (258) 7
+    KW_FLOAT (259) 8
+    KW_CHAR (260) 9
+    KW_BOOL (261) 10
+    KW_VOID (262) 11
+    KW_IF (263) 42 43
+    KW_ELSE (264) 43
+    KW_WHILE (265) 44 45
+    KW_DO (266) 45
+    KW_FOR (267) 46
+    KW_RETURN (268) 54 55
+    KW_STRUCT (269) 12 13
+    KW_BREAK (270) 56
+    KW_CONTINUE (271) 57
+    KW_PRINTF (272) 124
+    KW_SCANF (273) 125
+    INT_LITERAL <ival> (274) 18 19 118
+    BOOL_LITERAL <ival> (275) 122
+    FLOAT_LITERAL <fval> (276) 119
+    CHAR_LITERAL <cval> (277) 120
+    STR_LITERAL <sval> (278) 121
+    IDENTIFIER <sval> (279) 12 13 16 17 18 19 21 26 27 47 114 115 123
+    OP_PLUS (280) 96
+    OP_MINUS (281) 97 103
+    OP_MUL (282) 99 109
+    OP_DIV (283) 100
+    OP_MOD (284) 101
+    OP_ASSIGN (285) 17 19 47 61
+    OP_PLUS_ASSIGN (286) 62
+    OP_MINUS_ASSIGN (287) 63
+    OP_MUL_ASSIGN (288) 64
+    OP_DIV_ASSIGN (289) 65
+    OP_MOD_ASSIGN (290) 66
+    OP_AND_ASSIGN (291) 67
+    OP_OR_ASSIGN (292) 68
+    OP_XOR_ASSIGN (293) 69
+    OP_LSHIFT_ASSIGN (294) 70
+    OP_RSHIFT_ASSIGN (295) 71
+    OP_EQ (296) 85
+    OP_NEQ (297) 86
+    OP_LT (298) 88
+    OP_GT (299) 89
+    OP_LEQ (300) 90
+    OP_GEQ (301) 91
+    OP_AND (302) 77
+    OP_OR (303) 75
+    OP_NOT (304) 104
+    OP_INC (305) 106 116
+    OP_DEC (306) 107 117
+    OP_BITAND (307) 83 108
+    OP_BITOR (308) 79
+    OP_BITXOR (309) 81
+    OP_BITNOT (310) 105
+    OP_LSHIFT (311) 93
+    OP_RSHIFT (312) 94
+    OP_ARROW (313) 115
+    OP_DOT (314) 114
+    LPAREN (315) 21 42 43 44 45 46 110 113 126
+    RPAREN (316) 21 42 43 44 45 46 110 113 126
+    LBRACE (317) 13 19 28
+    RBRACE (318) 13 19 28
+    LBRACKET (319) 18 19 27 112
+    RBRACKET (320) 18 19 27 112
+    SEMICOLON (321) 13 16 17 18 19 41 45 46 54 55 56 57 58
+    COMMA (322) 25 130
+    COLON (323) 73
+    QUESTION (324) 73
+    UNARY_PREC (325)
+
+
+Nonterminals, with rules where they appear
+
+    $accept (71)
+        on left: 0
+    program <node> (72)
+        on left: 1
+        on right: 0
+    translation_unit <list> (73)
+        on left: 2 3
+        on right: 1 3
+    declaration <node> (74)
+        on left: 4 5 6
+        on right: 3
+    type_spec <node> (75)
+        on left: 7 8 9 10 11 12
+        on right: 16 17 18 19 21 26 27 47 110
+    struct_decl <node> (76)
+        on left: 13
+        on right: 6
+    declaration_list <list> (77)
+        on left: 14 15
+        on right: 13 15
+    var_decl <node> (78)
+        on left: 16 17 18 19
+        on right: 5 15 31
+    init_opt <node> (79)
+        on left: 20
+        on right: 17
+    function_def <node> (80)
+        on left: 21
+        on right: 4
+    param_list <list> (81)
+        on left: 22 23
+        on right: 21
+    param_list_ne <list> (82)
+        on left: 24 25
+        on right: 23 25
+    param <node> (83)
+        on left: 26 27
+        on right: 24 25
+    compound_stmt <node> (84)
+        on left: 28
+        on right: 21 39
+    stmt_list <list> (85)
+        on left: 29 30
+        on right: 28 30
+    stmt <node> (86)
+        on left: 31 32 33 34 35 36 37 38 39 40 41
+        on right: 30 42 43 44 45 46
+    if_stmt <node> (87)
+        on left: 42 43
+        on right: 32
+    while_stmt <node> (88)
+        on left: 44
+        on right: 33
+    do_while_stmt <node> (89)
+        on left: 45
+        on right: 34
+    for_stmt <node> (90)
+        on left: 46
+        on right: 35
+    for_init <node> (91)
+        on left: 47 48 49
+        on right: 46
+    for_cond <node> (92)
+        on left: 50 51
+        on right: 46
+    for_incr <node> (93)
+        on left: 52 53
+        on right: 46
+    return_stmt <node> (94)
+        on left: 54 55
+        on right: 36
+    break_stmt <node> (95)
+        on left: 56
+        on right: 37
+    continue_stmt <node> (96)
+        on left: 57
+        on right: 38
+    expr_stmt <node> (97)
+        on left: 58
+        on right: 40
+    expr <node> (98)
+        on left: 59
+        on right: 20 42 43 44 45 47 48 50 52 54 58 73 112 126 129 130
+    assign_expr <node> (99)
+        on left: 60 61 62 63 64 65 66 67 68 69 70 71
+        on right: 59 61 62 63 64 65 66 67 68 69 70 71
+    ternary_expr <node> (100)
+        on left: 72 73
+        on right: 60 73
+    or_expr <node> (101)
+        on left: 74 75
+        on right: 72 73 75
+    and_expr <node> (102)
+        on left: 76 77
+        on right: 74 75 77
+    bitor_expr <node> (103)
+        on left: 78 79
+        on right: 76 77 79
+    bitxor_expr <node> (104)
+        on left: 80 81
+        on right: 78 79 81
+    bitand_expr <node> (105)
+        on left: 82 83
+        on right: 80 81 83
+    eq_expr <node> (106)
+        on left: 84 85 86
+        on right: 82 83 85 86
+    rel_expr <node> (107)
+        on left: 87 88 89 90 91
+        on right: 84 85 86 88 89 90 91
+    shift_expr <node> (108)
+        on left: 92 93 94
+        on right: 87 88 89 90 91 93 94
+    add_expr <node> (109)
+        on left: 95 96 97
+        on right: 92 93 94 96 97
+    mul_expr <node> (110)
+        on left: 98 99 100 101
+        on right: 95 96 97 99 100 101
+    unary_expr <node> (111)
+        on left: 102 103 104 105 106 107 108 109 110
+        on right: 61 62 63 64 65 66 67 68 69 70 71 98 99 100 101 103 104 105 106 107 108 109 110
+    postfix_expr <node> (112)
+        on left: 111 112 113 114 115 116 117
+        on right: 102 112 113 114 115 116 117
+    primary_expr <node> (113)
+        on left: 118 119 120 121 122 123 124 125 126
+        on right: 111
+    arg_list <list> (114)
+        on left: 127 128
+        on right: 19 113
+    arg_list_ne <list> (115)
+        on left: 129 130
+        on right: 128 130
+
+
+State 0
+
+    0 $accept: • program $end
+
+    $default  reduce using rule 2 (translation_unit)
+
+    program           go to state 1
+    translation_unit  go to state 2
+
+
+State 1
+
+    0 $accept: program • $end
+
+    $end  shift, and go to state 3
+
+
+State 2
+
+    1 program: translation_unit •
+    3 translation_unit: translation_unit • declaration
+
+    KW_INT     shift, and go to state 4
+    KW_FLOAT   shift, and go to state 5
+    KW_CHAR    shift, and go to state 6
+    KW_BOOL    shift, and go to state 7
+    KW_VOID    shift, and go to state 8
+    KW_STRUCT  shift, and go to state 9
+
+    $default  reduce using rule 1 (program)
+
+    declaration   go to state 10
+    type_spec     go to state 11
+    struct_decl   go to state 12
+    var_decl      go to state 13
+    function_def  go to state 14
+
+
+State 3
+
+    0 $accept: program $end •
+
+    $default  accept
+
+
+State 4
+
+    7 type_spec: KW_INT •
+
+    $default  reduce using rule 7 (type_spec)
+
+
+State 5
+
+    8 type_spec: KW_FLOAT •
+
+    $default  reduce using rule 8 (type_spec)
+
+
+State 6
+
+    9 type_spec: KW_CHAR •
+
+    $default  reduce using rule 9 (type_spec)
+
+
+State 7
+
+   10 type_spec: KW_BOOL •
+
+    $default  reduce using rule 10 (type_spec)
+
+
+State 8
+
+   11 type_spec: KW_VOID •
+
+    $default  reduce using rule 11 (type_spec)
+
+
+State 9
+
+   12 type_spec: KW_STRUCT • IDENTIFIER
+   13 struct_decl: KW_STRUCT • IDENTIFIER LBRACE declaration_list RBRACE SEMICOLON
+
+    IDENTIFIER  shift, and go to state 15
+
+
+State 10
+
+    3 translation_unit: translation_unit declaration •
+
+    $default  reduce using rule 3 (translation_unit)
+
+
+State 11
+
+   16 var_decl: type_spec • IDENTIFIER SEMICOLON
+   17         | type_spec • IDENTIFIER OP_ASSIGN init_opt SEMICOLON
+   18         | type_spec • IDENTIFIER LBRACKET INT_LITERAL RBRACKET SEMICOLON
+   19         | type_spec • IDENTIFIER LBRACKET INT_LITERAL RBRACKET OP_ASSIGN LBRACE arg_list RBRACE SEMICOLON
+   21 function_def: type_spec • IDENTIFIER LPAREN param_list RPAREN compound_stmt
+
+    IDENTIFIER  shift, and go to state 16
+
+
+State 12
+
+    6 declaration: struct_decl •
+
+    $default  reduce using rule 6 (declaration)
+
+
+State 13
+
+    5 declaration: var_decl •
+
+    $default  reduce using rule 5 (declaration)
+
+
+State 14
+
+    4 declaration: function_def •
+
+    $default  reduce using rule 4 (declaration)
+
+
+State 15
+
+   12 type_spec: KW_STRUCT IDENTIFIER •
+   13 struct_decl: KW_STRUCT IDENTIFIER • LBRACE declaration_list RBRACE SEMICOLON
+
+    LBRACE  shift, and go to state 17
+
+    $default  reduce using rule 12 (type_spec)
+
+
+State 16
+
+   16 var_decl: type_spec IDENTIFIER • SEMICOLON
+   17         | type_spec IDENTIFIER • OP_ASSIGN init_opt SEMICOLON
+   18         | type_spec IDENTIFIER • LBRACKET INT_LITERAL RBRACKET SEMICOLON
+   19         | type_spec IDENTIFIER • LBRACKET INT_LITERAL RBRACKET OP_ASSIGN LBRACE arg_list RBRACE SEMICOLON
+   21 function_def: type_spec IDENTIFIER • LPAREN param_list RPAREN compound_stmt
+
+    OP_ASSIGN  shift, and go to state 18
+    LPAREN     shift, and go to state 19
+    LBRACKET   shift, and go to state 20
+    SEMICOLON  shift, and go to state 21
+
+
+State 17
+
+   13 struct_decl: KW_STRUCT IDENTIFIER LBRACE • declaration_list RBRACE SEMICOLON
+
+    $default  reduce using rule 14 (declaration_list)
+
+    declaration_list  go to state 22
+
+
+State 18
+
+   17 var_decl: type_spec IDENTIFIER OP_ASSIGN • init_opt SEMICOLON
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    init_opt      go to state 39
+    expr          go to state 40
+    assign_expr   go to state 41
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 19
+
+   21 function_def: type_spec IDENTIFIER LPAREN • param_list RPAREN compound_stmt
+
+    KW_INT     shift, and go to state 4
+    KW_FLOAT   shift, and go to state 5
+    KW_CHAR    shift, and go to state 6
+    KW_BOOL    shift, and go to state 7
+    KW_VOID    shift, and go to state 8
+    KW_STRUCT  shift, and go to state 56
+
+    $default  reduce using rule 22 (param_list)
+
+    type_spec      go to state 57
+    param_list     go to state 58
+    param_list_ne  go to state 59
+    param          go to state 60
+
+
+State 20
+
+   18 var_decl: type_spec IDENTIFIER LBRACKET • INT_LITERAL RBRACKET SEMICOLON
+   19         | type_spec IDENTIFIER LBRACKET • INT_LITERAL RBRACKET OP_ASSIGN LBRACE arg_list RBRACE SEMICOLON
+
+    INT_LITERAL  shift, and go to state 61
+
+
+State 21
+
+   16 var_decl: type_spec IDENTIFIER SEMICOLON •
+
+    $default  reduce using rule 16 (var_decl)
+
+
+State 22
+
+   13 struct_decl: KW_STRUCT IDENTIFIER LBRACE declaration_list • RBRACE SEMICOLON
+   15 declaration_list: declaration_list • var_decl
+
+    KW_INT     shift, and go to state 4
+    KW_FLOAT   shift, and go to state 5
+    KW_CHAR    shift, and go to state 6
+    KW_BOOL    shift, and go to state 7
+    KW_VOID    shift, and go to state 8
+    KW_STRUCT  shift, and go to state 56
+    RBRACE     shift, and go to state 62
+
+    type_spec  go to state 63
+    var_decl   go to state 64
+
+
+State 23
+
+  124 primary_expr: KW_PRINTF •
+
+    $default  reduce using rule 124 (primary_expr)
+
+
+State 24
+
+  125 primary_expr: KW_SCANF •
+
+    $default  reduce using rule 125 (primary_expr)
+
+
+State 25
+
+  118 primary_expr: INT_LITERAL •
+
+    $default  reduce using rule 118 (primary_expr)
+
+
+State 26
+
+  122 primary_expr: BOOL_LITERAL •
+
+    $default  reduce using rule 122 (primary_expr)
+
+
+State 27
+
+  119 primary_expr: FLOAT_LITERAL •
+
+    $default  reduce using rule 119 (primary_expr)
+
+
+State 28
+
+  120 primary_expr: CHAR_LITERAL •
+
+    $default  reduce using rule 120 (primary_expr)
+
+
+State 29
+
+  121 primary_expr: STR_LITERAL •
+
+    $default  reduce using rule 121 (primary_expr)
+
+
+State 30
+
+  123 primary_expr: IDENTIFIER •
+
+    $default  reduce using rule 123 (primary_expr)
+
+
+State 31
+
+  103 unary_expr: OP_MINUS • unary_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    unary_expr    go to state 65
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 32
+
+  109 unary_expr: OP_MUL • unary_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    unary_expr    go to state 66
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 33
+
+  104 unary_expr: OP_NOT • unary_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    unary_expr    go to state 67
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 34
+
+  106 unary_expr: OP_INC • unary_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    unary_expr    go to state 68
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 35
+
+  107 unary_expr: OP_DEC • unary_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    unary_expr    go to state 69
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 36
+
+  108 unary_expr: OP_BITAND • unary_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    unary_expr    go to state 70
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 37
+
+  105 unary_expr: OP_BITNOT • unary_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    unary_expr    go to state 71
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 38
+
+  110 unary_expr: LPAREN • type_spec RPAREN unary_expr
+  126 primary_expr: LPAREN • expr RPAREN
+
+    KW_INT         shift, and go to state 4
+    KW_FLOAT       shift, and go to state 5
+    KW_CHAR        shift, and go to state 6
+    KW_BOOL        shift, and go to state 7
+    KW_VOID        shift, and go to state 8
+    KW_STRUCT      shift, and go to state 56
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    type_spec     go to state 72
+    expr          go to state 73
+    assign_expr   go to state 41
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 39
+
+   17 var_decl: type_spec IDENTIFIER OP_ASSIGN init_opt • SEMICOLON
+
+    SEMICOLON  shift, and go to state 74
+
+
+State 40
+
+   20 init_opt: expr •
+
+    $default  reduce using rule 20 (init_opt)
+
+
+State 41
+
+   59 expr: assign_expr •
+
+    $default  reduce using rule 59 (expr)
+
+
+State 42
+
+   60 assign_expr: ternary_expr •
+
+    $default  reduce using rule 60 (assign_expr)
+
+
+State 43
+
+   72 ternary_expr: or_expr •
+   73             | or_expr • QUESTION expr COLON ternary_expr
+   75 or_expr: or_expr • OP_OR and_expr
+
+    OP_OR     shift, and go to state 75
+    QUESTION  shift, and go to state 76
+
+    $default  reduce using rule 72 (ternary_expr)
+
+
+State 44
+
+   74 or_expr: and_expr •
+   77 and_expr: and_expr • OP_AND bitor_expr
+
+    OP_AND  shift, and go to state 77
+
+    $default  reduce using rule 74 (or_expr)
+
+
+State 45
+
+   76 and_expr: bitor_expr •
+   79 bitor_expr: bitor_expr • OP_BITOR bitxor_expr
+
+    OP_BITOR  shift, and go to state 78
+
+    $default  reduce using rule 76 (and_expr)
+
+
+State 46
+
+   78 bitor_expr: bitxor_expr •
+   81 bitxor_expr: bitxor_expr • OP_BITXOR bitand_expr
+
+    OP_BITXOR  shift, and go to state 79
+
+    $default  reduce using rule 78 (bitor_expr)
+
+
+State 47
+
+   80 bitxor_expr: bitand_expr •
+   83 bitand_expr: bitand_expr • OP_BITAND eq_expr
+
+    OP_BITAND  shift, and go to state 80
+
+    $default  reduce using rule 80 (bitxor_expr)
+
+
+State 48
+
+   82 bitand_expr: eq_expr •
+   85 eq_expr: eq_expr • OP_EQ rel_expr
+   86        | eq_expr • OP_NEQ rel_expr
+
+    OP_EQ   shift, and go to state 81
+    OP_NEQ  shift, and go to state 82
+
+    $default  reduce using rule 82 (bitand_expr)
+
+
+State 49
+
+   84 eq_expr: rel_expr •
+   88 rel_expr: rel_expr • OP_LT shift_expr
+   89         | rel_expr • OP_GT shift_expr
+   90         | rel_expr • OP_LEQ shift_expr
+   91         | rel_expr • OP_GEQ shift_expr
+
+    OP_LT   shift, and go to state 83
+    OP_GT   shift, and go to state 84
+    OP_LEQ  shift, and go to state 85
+    OP_GEQ  shift, and go to state 86
+
+    $default  reduce using rule 84 (eq_expr)
+
+
+State 50
+
+   87 rel_expr: shift_expr •
+   93 shift_expr: shift_expr • OP_LSHIFT add_expr
+   94           | shift_expr • OP_RSHIFT add_expr
+
+    OP_LSHIFT  shift, and go to state 87
+    OP_RSHIFT  shift, and go to state 88
+
+    $default  reduce using rule 87 (rel_expr)
+
+
+State 51
+
+   92 shift_expr: add_expr •
+   96 add_expr: add_expr • OP_PLUS mul_expr
+   97         | add_expr • OP_MINUS mul_expr
+
+    OP_PLUS   shift, and go to state 89
+    OP_MINUS  shift, and go to state 90
+
+    $default  reduce using rule 92 (shift_expr)
+
+
+State 52
+
+   95 add_expr: mul_expr •
+   99 mul_expr: mul_expr • OP_MUL unary_expr
+  100         | mul_expr • OP_DIV unary_expr
+  101         | mul_expr • OP_MOD unary_expr
+
+    OP_MUL  shift, and go to state 91
+    OP_DIV  shift, and go to state 92
+    OP_MOD  shift, and go to state 93
+
+    $default  reduce using rule 95 (add_expr)
+
+
+State 53
+
+   61 assign_expr: unary_expr • OP_ASSIGN assign_expr
+   62            | unary_expr • OP_PLUS_ASSIGN assign_expr
+   63            | unary_expr • OP_MINUS_ASSIGN assign_expr
+   64            | unary_expr • OP_MUL_ASSIGN assign_expr
+   65            | unary_expr • OP_DIV_ASSIGN assign_expr
+   66            | unary_expr • OP_MOD_ASSIGN assign_expr
+   67            | unary_expr • OP_AND_ASSIGN assign_expr
+   68            | unary_expr • OP_OR_ASSIGN assign_expr
+   69            | unary_expr • OP_XOR_ASSIGN assign_expr
+   70            | unary_expr • OP_LSHIFT_ASSIGN assign_expr
+   71            | unary_expr • OP_RSHIFT_ASSIGN assign_expr
+   98 mul_expr: unary_expr •
+
+    OP_ASSIGN         shift, and go to state 94
+    OP_PLUS_ASSIGN    shift, and go to state 95
+    OP_MINUS_ASSIGN   shift, and go to state 96
+    OP_MUL_ASSIGN     shift, and go to state 97
+    OP_DIV_ASSIGN     shift, and go to state 98
+    OP_MOD_ASSIGN     shift, and go to state 99
+    OP_AND_ASSIGN     shift, and go to state 100
+    OP_OR_ASSIGN      shift, and go to state 101
+    OP_XOR_ASSIGN     shift, and go to state 102
+    OP_LSHIFT_ASSIGN  shift, and go to state 103
+    OP_RSHIFT_ASSIGN  shift, and go to state 104
+
+    $default  reduce using rule 98 (mul_expr)
+
+
+State 54
+
+  102 unary_expr: postfix_expr •
+  112 postfix_expr: postfix_expr • LBRACKET expr RBRACKET
+  113             | postfix_expr • LPAREN arg_list RPAREN
+  114             | postfix_expr • OP_DOT IDENTIFIER
+  115             | postfix_expr • OP_ARROW IDENTIFIER
+  116             | postfix_expr • OP_INC
+  117             | postfix_expr • OP_DEC
+
+    OP_INC    shift, and go to state 105
+    OP_DEC    shift, and go to state 106
+    OP_ARROW  shift, and go to state 107
+    OP_DOT    shift, and go to state 108
+    LPAREN    shift, and go to state 109
+    LBRACKET  shift, and go to state 110
+
+    $default  reduce using rule 102 (unary_expr)
+
+
+State 55
+
+  111 postfix_expr: primary_expr •
+
+    $default  reduce using rule 111 (postfix_expr)
+
+
+State 56
+
+   12 type_spec: KW_STRUCT • IDENTIFIER
+
+    IDENTIFIER  shift, and go to state 111
+
+
+State 57
+
+   26 param: type_spec • IDENTIFIER
+   27      | type_spec • IDENTIFIER LBRACKET RBRACKET
+
+    IDENTIFIER  shift, and go to state 112
+
+
+State 58
+
+   21 function_def: type_spec IDENTIFIER LPAREN param_list • RPAREN compound_stmt
+
+    RPAREN  shift, and go to state 113
+
+
+State 59
+
+   23 param_list: param_list_ne •
+   25 param_list_ne: param_list_ne • COMMA param
+
+    COMMA  shift, and go to state 114
+
+    $default  reduce using rule 23 (param_list)
+
+
+State 60
+
+   24 param_list_ne: param •
+
+    $default  reduce using rule 24 (param_list_ne)
+
+
+State 61
+
+   18 var_decl: type_spec IDENTIFIER LBRACKET INT_LITERAL • RBRACKET SEMICOLON
+   19         | type_spec IDENTIFIER LBRACKET INT_LITERAL • RBRACKET OP_ASSIGN LBRACE arg_list RBRACE SEMICOLON
+
+    RBRACKET  shift, and go to state 115
+
+
+State 62
+
+   13 struct_decl: KW_STRUCT IDENTIFIER LBRACE declaration_list RBRACE • SEMICOLON
+
+    SEMICOLON  shift, and go to state 116
+
+
+State 63
+
+   16 var_decl: type_spec • IDENTIFIER SEMICOLON
+   17         | type_spec • IDENTIFIER OP_ASSIGN init_opt SEMICOLON
+   18         | type_spec • IDENTIFIER LBRACKET INT_LITERAL RBRACKET SEMICOLON
+   19         | type_spec • IDENTIFIER LBRACKET INT_LITERAL RBRACKET OP_ASSIGN LBRACE arg_list RBRACE SEMICOLON
+
+    IDENTIFIER  shift, and go to state 117
+
+
+State 64
+
+   15 declaration_list: declaration_list var_decl •
+
+    $default  reduce using rule 15 (declaration_list)
+
+
+State 65
+
+  103 unary_expr: OP_MINUS unary_expr •
+
+    $default  reduce using rule 103 (unary_expr)
+
+
+State 66
+
+  109 unary_expr: OP_MUL unary_expr •
+
+    $default  reduce using rule 109 (unary_expr)
+
+
+State 67
+
+  104 unary_expr: OP_NOT unary_expr •
+
+    $default  reduce using rule 104 (unary_expr)
+
+
+State 68
+
+  106 unary_expr: OP_INC unary_expr •
+
+    $default  reduce using rule 106 (unary_expr)
+
+
+State 69
+
+  107 unary_expr: OP_DEC unary_expr •
+
+    $default  reduce using rule 107 (unary_expr)
+
+
+State 70
+
+  108 unary_expr: OP_BITAND unary_expr •
+
+    $default  reduce using rule 108 (unary_expr)
+
+
+State 71
+
+  105 unary_expr: OP_BITNOT unary_expr •
+
+    $default  reduce using rule 105 (unary_expr)
+
+
+State 72
+
+  110 unary_expr: LPAREN type_spec • RPAREN unary_expr
+
+    RPAREN  shift, and go to state 118
+
+
+State 73
+
+  126 primary_expr: LPAREN expr • RPAREN
+
+    RPAREN  shift, and go to state 119
+
+
+State 74
+
+   17 var_decl: type_spec IDENTIFIER OP_ASSIGN init_opt SEMICOLON •
+
+    $default  reduce using rule 17 (var_decl)
+
+
+State 75
+
+   75 or_expr: or_expr OP_OR • and_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    and_expr      go to state 120
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 121
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 76
+
+   73 ternary_expr: or_expr QUESTION • expr COLON ternary_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    expr          go to state 122
+    assign_expr   go to state 41
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 77
+
+   77 and_expr: and_expr OP_AND • bitor_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    bitor_expr    go to state 123
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 121
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 78
+
+   79 bitor_expr: bitor_expr OP_BITOR • bitxor_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    bitxor_expr   go to state 124
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 121
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 79
+
+   81 bitxor_expr: bitxor_expr OP_BITXOR • bitand_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    bitand_expr   go to state 125
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 121
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 80
+
+   83 bitand_expr: bitand_expr OP_BITAND • eq_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    eq_expr       go to state 126
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 121
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 81
+
+   85 eq_expr: eq_expr OP_EQ • rel_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    rel_expr      go to state 127
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 121
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 82
+
+   86 eq_expr: eq_expr OP_NEQ • rel_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    rel_expr      go to state 128
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 121
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 83
+
+   88 rel_expr: rel_expr OP_LT • shift_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    shift_expr    go to state 129
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 121
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 84
+
+   89 rel_expr: rel_expr OP_GT • shift_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    shift_expr    go to state 130
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 121
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 85
+
+   90 rel_expr: rel_expr OP_LEQ • shift_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    shift_expr    go to state 131
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 121
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 86
+
+   91 rel_expr: rel_expr OP_GEQ • shift_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    shift_expr    go to state 132
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 121
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 87
+
+   93 shift_expr: shift_expr OP_LSHIFT • add_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    add_expr      go to state 133
+    mul_expr      go to state 52
+    unary_expr    go to state 121
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 88
+
+   94 shift_expr: shift_expr OP_RSHIFT • add_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    add_expr      go to state 134
+    mul_expr      go to state 52
+    unary_expr    go to state 121
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 89
+
+   96 add_expr: add_expr OP_PLUS • mul_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    mul_expr      go to state 135
+    unary_expr    go to state 121
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 90
+
+   97 add_expr: add_expr OP_MINUS • mul_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    mul_expr      go to state 136
+    unary_expr    go to state 121
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 91
+
+   99 mul_expr: mul_expr OP_MUL • unary_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    unary_expr    go to state 137
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 92
+
+  100 mul_expr: mul_expr OP_DIV • unary_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    unary_expr    go to state 138
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 93
+
+  101 mul_expr: mul_expr OP_MOD • unary_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    unary_expr    go to state 139
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 94
+
+   61 assign_expr: unary_expr OP_ASSIGN • assign_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    assign_expr   go to state 140
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 95
+
+   62 assign_expr: unary_expr OP_PLUS_ASSIGN • assign_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    assign_expr   go to state 141
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 96
+
+   63 assign_expr: unary_expr OP_MINUS_ASSIGN • assign_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    assign_expr   go to state 142
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 97
+
+   64 assign_expr: unary_expr OP_MUL_ASSIGN • assign_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    assign_expr   go to state 143
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 98
+
+   65 assign_expr: unary_expr OP_DIV_ASSIGN • assign_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    assign_expr   go to state 144
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 99
+
+   66 assign_expr: unary_expr OP_MOD_ASSIGN • assign_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    assign_expr   go to state 145
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 100
+
+   67 assign_expr: unary_expr OP_AND_ASSIGN • assign_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    assign_expr   go to state 146
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 101
+
+   68 assign_expr: unary_expr OP_OR_ASSIGN • assign_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    assign_expr   go to state 147
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 102
+
+   69 assign_expr: unary_expr OP_XOR_ASSIGN • assign_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    assign_expr   go to state 148
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 103
+
+   70 assign_expr: unary_expr OP_LSHIFT_ASSIGN • assign_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    assign_expr   go to state 149
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 104
+
+   71 assign_expr: unary_expr OP_RSHIFT_ASSIGN • assign_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    assign_expr   go to state 150
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 105
+
+  116 postfix_expr: postfix_expr OP_INC •
+
+    $default  reduce using rule 116 (postfix_expr)
+
+
+State 106
+
+  117 postfix_expr: postfix_expr OP_DEC •
+
+    $default  reduce using rule 117 (postfix_expr)
+
+
+State 107
+
+  115 postfix_expr: postfix_expr OP_ARROW • IDENTIFIER
+
+    IDENTIFIER  shift, and go to state 151
+
+
+State 108
+
+  114 postfix_expr: postfix_expr OP_DOT • IDENTIFIER
+
+    IDENTIFIER  shift, and go to state 152
+
+
+State 109
+
+  113 postfix_expr: postfix_expr LPAREN • arg_list RPAREN
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    $default  reduce using rule 127 (arg_list)
+
+    expr          go to state 153
+    assign_expr   go to state 41
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+    arg_list      go to state 154
+    arg_list_ne   go to state 155
+
+
+State 110
+
+  112 postfix_expr: postfix_expr LBRACKET • expr RBRACKET
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    expr          go to state 156
+    assign_expr   go to state 41
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 111
+
+   12 type_spec: KW_STRUCT IDENTIFIER •
+
+    $default  reduce using rule 12 (type_spec)
+
+
+State 112
+
+   26 param: type_spec IDENTIFIER •
+   27      | type_spec IDENTIFIER • LBRACKET RBRACKET
+
+    LBRACKET  shift, and go to state 157
+
+    $default  reduce using rule 26 (param)
+
+
+State 113
+
+   21 function_def: type_spec IDENTIFIER LPAREN param_list RPAREN • compound_stmt
+
+    LBRACE  shift, and go to state 158
+
+    compound_stmt  go to state 159
+
+
+State 114
+
+   25 param_list_ne: param_list_ne COMMA • param
+
+    KW_INT     shift, and go to state 4
+    KW_FLOAT   shift, and go to state 5
+    KW_CHAR    shift, and go to state 6
+    KW_BOOL    shift, and go to state 7
+    KW_VOID    shift, and go to state 8
+    KW_STRUCT  shift, and go to state 56
+
+    type_spec  go to state 57
+    param      go to state 160
+
+
+State 115
+
+   18 var_decl: type_spec IDENTIFIER LBRACKET INT_LITERAL RBRACKET • SEMICOLON
+   19         | type_spec IDENTIFIER LBRACKET INT_LITERAL RBRACKET • OP_ASSIGN LBRACE arg_list RBRACE SEMICOLON
+
+    OP_ASSIGN  shift, and go to state 161
+    SEMICOLON  shift, and go to state 162
+
+
+State 116
+
+   13 struct_decl: KW_STRUCT IDENTIFIER LBRACE declaration_list RBRACE SEMICOLON •
+
+    $default  reduce using rule 13 (struct_decl)
+
+
+State 117
+
+   16 var_decl: type_spec IDENTIFIER • SEMICOLON
+   17         | type_spec IDENTIFIER • OP_ASSIGN init_opt SEMICOLON
+   18         | type_spec IDENTIFIER • LBRACKET INT_LITERAL RBRACKET SEMICOLON
+   19         | type_spec IDENTIFIER • LBRACKET INT_LITERAL RBRACKET OP_ASSIGN LBRACE arg_list RBRACE SEMICOLON
+
+    OP_ASSIGN  shift, and go to state 18
+    LBRACKET   shift, and go to state 20
+    SEMICOLON  shift, and go to state 21
+
+
+State 118
+
+  110 unary_expr: LPAREN type_spec RPAREN • unary_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    unary_expr    go to state 163
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 119
+
+  126 primary_expr: LPAREN expr RPAREN •
+
+    $default  reduce using rule 126 (primary_expr)
+
+
+State 120
+
+   75 or_expr: or_expr OP_OR and_expr •
+   77 and_expr: and_expr • OP_AND bitor_expr
+
+    OP_AND  shift, and go to state 77
+
+    $default  reduce using rule 75 (or_expr)
+
+
+State 121
+
+   98 mul_expr: unary_expr •
+
+    $default  reduce using rule 98 (mul_expr)
+
+
+State 122
+
+   73 ternary_expr: or_expr QUESTION expr • COLON ternary_expr
+
+    COLON  shift, and go to state 164
+
+
+State 123
+
+   77 and_expr: and_expr OP_AND bitor_expr •
+   79 bitor_expr: bitor_expr • OP_BITOR bitxor_expr
+
+    OP_BITOR  shift, and go to state 78
+
+    $default  reduce using rule 77 (and_expr)
+
+
+State 124
+
+   79 bitor_expr: bitor_expr OP_BITOR bitxor_expr •
+   81 bitxor_expr: bitxor_expr • OP_BITXOR bitand_expr
+
+    OP_BITXOR  shift, and go to state 79
+
+    $default  reduce using rule 79 (bitor_expr)
+
+
+State 125
+
+   81 bitxor_expr: bitxor_expr OP_BITXOR bitand_expr •
+   83 bitand_expr: bitand_expr • OP_BITAND eq_expr
+
+    OP_BITAND  shift, and go to state 80
+
+    $default  reduce using rule 81 (bitxor_expr)
+
+
+State 126
+
+   83 bitand_expr: bitand_expr OP_BITAND eq_expr •
+   85 eq_expr: eq_expr • OP_EQ rel_expr
+   86        | eq_expr • OP_NEQ rel_expr
+
+    OP_EQ   shift, and go to state 81
+    OP_NEQ  shift, and go to state 82
+
+    $default  reduce using rule 83 (bitand_expr)
+
+
+State 127
+
+   85 eq_expr: eq_expr OP_EQ rel_expr •
+   88 rel_expr: rel_expr • OP_LT shift_expr
+   89         | rel_expr • OP_GT shift_expr
+   90         | rel_expr • OP_LEQ shift_expr
+   91         | rel_expr • OP_GEQ shift_expr
+
+    OP_LT   shift, and go to state 83
+    OP_GT   shift, and go to state 84
+    OP_LEQ  shift, and go to state 85
+    OP_GEQ  shift, and go to state 86
+
+    $default  reduce using rule 85 (eq_expr)
+
+
+State 128
+
+   86 eq_expr: eq_expr OP_NEQ rel_expr •
+   88 rel_expr: rel_expr • OP_LT shift_expr
+   89         | rel_expr • OP_GT shift_expr
+   90         | rel_expr • OP_LEQ shift_expr
+   91         | rel_expr • OP_GEQ shift_expr
+
+    OP_LT   shift, and go to state 83
+    OP_GT   shift, and go to state 84
+    OP_LEQ  shift, and go to state 85
+    OP_GEQ  shift, and go to state 86
+
+    $default  reduce using rule 86 (eq_expr)
+
+
+State 129
+
+   88 rel_expr: rel_expr OP_LT shift_expr •
+   93 shift_expr: shift_expr • OP_LSHIFT add_expr
+   94           | shift_expr • OP_RSHIFT add_expr
+
+    OP_LSHIFT  shift, and go to state 87
+    OP_RSHIFT  shift, and go to state 88
+
+    $default  reduce using rule 88 (rel_expr)
+
+
+State 130
+
+   89 rel_expr: rel_expr OP_GT shift_expr •
+   93 shift_expr: shift_expr • OP_LSHIFT add_expr
+   94           | shift_expr • OP_RSHIFT add_expr
+
+    OP_LSHIFT  shift, and go to state 87
+    OP_RSHIFT  shift, and go to state 88
+
+    $default  reduce using rule 89 (rel_expr)
+
+
+State 131
+
+   90 rel_expr: rel_expr OP_LEQ shift_expr •
+   93 shift_expr: shift_expr • OP_LSHIFT add_expr
+   94           | shift_expr • OP_RSHIFT add_expr
+
+    OP_LSHIFT  shift, and go to state 87
+    OP_RSHIFT  shift, and go to state 88
+
+    $default  reduce using rule 90 (rel_expr)
+
+
+State 132
+
+   91 rel_expr: rel_expr OP_GEQ shift_expr •
+   93 shift_expr: shift_expr • OP_LSHIFT add_expr
+   94           | shift_expr • OP_RSHIFT add_expr
+
+    OP_LSHIFT  shift, and go to state 87
+    OP_RSHIFT  shift, and go to state 88
+
+    $default  reduce using rule 91 (rel_expr)
+
+
+State 133
+
+   93 shift_expr: shift_expr OP_LSHIFT add_expr •
+   96 add_expr: add_expr • OP_PLUS mul_expr
+   97         | add_expr • OP_MINUS mul_expr
+
+    OP_PLUS   shift, and go to state 89
+    OP_MINUS  shift, and go to state 90
+
+    $default  reduce using rule 93 (shift_expr)
+
+
+State 134
+
+   94 shift_expr: shift_expr OP_RSHIFT add_expr •
+   96 add_expr: add_expr • OP_PLUS mul_expr
+   97         | add_expr • OP_MINUS mul_expr
+
+    OP_PLUS   shift, and go to state 89
+    OP_MINUS  shift, and go to state 90
+
+    $default  reduce using rule 94 (shift_expr)
+
+
+State 135
+
+   96 add_expr: add_expr OP_PLUS mul_expr •
+   99 mul_expr: mul_expr • OP_MUL unary_expr
+  100         | mul_expr • OP_DIV unary_expr
+  101         | mul_expr • OP_MOD unary_expr
+
+    OP_MUL  shift, and go to state 91
+    OP_DIV  shift, and go to state 92
+    OP_MOD  shift, and go to state 93
+
+    $default  reduce using rule 96 (add_expr)
+
+
+State 136
+
+   97 add_expr: add_expr OP_MINUS mul_expr •
+   99 mul_expr: mul_expr • OP_MUL unary_expr
+  100         | mul_expr • OP_DIV unary_expr
+  101         | mul_expr • OP_MOD unary_expr
+
+    OP_MUL  shift, and go to state 91
+    OP_DIV  shift, and go to state 92
+    OP_MOD  shift, and go to state 93
+
+    $default  reduce using rule 97 (add_expr)
+
+
+State 137
+
+   99 mul_expr: mul_expr OP_MUL unary_expr •
+
+    $default  reduce using rule 99 (mul_expr)
+
+
+State 138
+
+  100 mul_expr: mul_expr OP_DIV unary_expr •
+
+    $default  reduce using rule 100 (mul_expr)
+
+
+State 139
+
+  101 mul_expr: mul_expr OP_MOD unary_expr •
+
+    $default  reduce using rule 101 (mul_expr)
+
+
+State 140
+
+   61 assign_expr: unary_expr OP_ASSIGN assign_expr •
+
+    $default  reduce using rule 61 (assign_expr)
+
+
+State 141
+
+   62 assign_expr: unary_expr OP_PLUS_ASSIGN assign_expr •
+
+    $default  reduce using rule 62 (assign_expr)
+
+
+State 142
+
+   63 assign_expr: unary_expr OP_MINUS_ASSIGN assign_expr •
+
+    $default  reduce using rule 63 (assign_expr)
+
+
+State 143
+
+   64 assign_expr: unary_expr OP_MUL_ASSIGN assign_expr •
+
+    $default  reduce using rule 64 (assign_expr)
+
+
+State 144
+
+   65 assign_expr: unary_expr OP_DIV_ASSIGN assign_expr •
+
+    $default  reduce using rule 65 (assign_expr)
+
+
+State 145
+
+   66 assign_expr: unary_expr OP_MOD_ASSIGN assign_expr •
+
+    $default  reduce using rule 66 (assign_expr)
+
+
+State 146
+
+   67 assign_expr: unary_expr OP_AND_ASSIGN assign_expr •
+
+    $default  reduce using rule 67 (assign_expr)
+
+
+State 147
+
+   68 assign_expr: unary_expr OP_OR_ASSIGN assign_expr •
+
+    $default  reduce using rule 68 (assign_expr)
+
+
+State 148
+
+   69 assign_expr: unary_expr OP_XOR_ASSIGN assign_expr •
+
+    $default  reduce using rule 69 (assign_expr)
+
+
+State 149
+
+   70 assign_expr: unary_expr OP_LSHIFT_ASSIGN assign_expr •
+
+    $default  reduce using rule 70 (assign_expr)
+
+
+State 150
+
+   71 assign_expr: unary_expr OP_RSHIFT_ASSIGN assign_expr •
+
+    $default  reduce using rule 71 (assign_expr)
+
+
+State 151
+
+  115 postfix_expr: postfix_expr OP_ARROW IDENTIFIER •
+
+    $default  reduce using rule 115 (postfix_expr)
+
+
+State 152
+
+  114 postfix_expr: postfix_expr OP_DOT IDENTIFIER •
+
+    $default  reduce using rule 114 (postfix_expr)
+
+
+State 153
+
+  129 arg_list_ne: expr •
+
+    $default  reduce using rule 129 (arg_list_ne)
+
+
+State 154
+
+  113 postfix_expr: postfix_expr LPAREN arg_list • RPAREN
+
+    RPAREN  shift, and go to state 165
+
+
+State 155
+
+  128 arg_list: arg_list_ne •
+  130 arg_list_ne: arg_list_ne • COMMA expr
+
+    COMMA  shift, and go to state 166
+
+    $default  reduce using rule 128 (arg_list)
+
+
+State 156
+
+  112 postfix_expr: postfix_expr LBRACKET expr • RBRACKET
+
+    RBRACKET  shift, and go to state 167
+
+
+State 157
+
+   27 param: type_spec IDENTIFIER LBRACKET • RBRACKET
+
+    RBRACKET  shift, and go to state 168
+
+
+State 158
+
+   28 compound_stmt: LBRACE • stmt_list RBRACE
+
+    $default  reduce using rule 29 (stmt_list)
+
+    stmt_list  go to state 169
+
+
+State 159
+
+   21 function_def: type_spec IDENTIFIER LPAREN param_list RPAREN compound_stmt •
+
+    $default  reduce using rule 21 (function_def)
+
+
+State 160
+
+   25 param_list_ne: param_list_ne COMMA param •
+
+    $default  reduce using rule 25 (param_list_ne)
+
+
+State 161
+
+   19 var_decl: type_spec IDENTIFIER LBRACKET INT_LITERAL RBRACKET OP_ASSIGN • LBRACE arg_list RBRACE SEMICOLON
+
+    LBRACE  shift, and go to state 170
+
+
+State 162
+
+   18 var_decl: type_spec IDENTIFIER LBRACKET INT_LITERAL RBRACKET SEMICOLON •
+
+    $default  reduce using rule 18 (var_decl)
+
+
+State 163
+
+  110 unary_expr: LPAREN type_spec RPAREN unary_expr •
+
+    $default  reduce using rule 110 (unary_expr)
+
+
+State 164
+
+   73 ternary_expr: or_expr QUESTION expr COLON • ternary_expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    ternary_expr  go to state 171
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 121
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 165
+
+  113 postfix_expr: postfix_expr LPAREN arg_list RPAREN •
+
+    $default  reduce using rule 113 (postfix_expr)
+
+
+State 166
+
+  130 arg_list_ne: arg_list_ne COMMA • expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    expr          go to state 172
+    assign_expr   go to state 41
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 167
+
+  112 postfix_expr: postfix_expr LBRACKET expr RBRACKET •
+
+    $default  reduce using rule 112 (postfix_expr)
+
+
+State 168
+
+   27 param: type_spec IDENTIFIER LBRACKET RBRACKET •
+
+    $default  reduce using rule 27 (param)
+
+
+State 169
+
+   28 compound_stmt: LBRACE stmt_list • RBRACE
+   30 stmt_list: stmt_list • stmt
+
+    KW_INT         shift, and go to state 4
+    KW_FLOAT       shift, and go to state 5
+    KW_CHAR        shift, and go to state 6
+    KW_BOOL        shift, and go to state 7
+    KW_VOID        shift, and go to state 8
+    KW_IF          shift, and go to state 173
+    KW_WHILE       shift, and go to state 174
+    KW_DO          shift, and go to state 175
+    KW_FOR         shift, and go to state 176
+    KW_RETURN      shift, and go to state 177
+    KW_STRUCT      shift, and go to state 56
+    KW_BREAK       shift, and go to state 178
+    KW_CONTINUE    shift, and go to state 179
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+    LBRACE         shift, and go to state 158
+    RBRACE         shift, and go to state 180
+    SEMICOLON      shift, and go to state 181
+
+    type_spec      go to state 63
+    var_decl       go to state 182
+    compound_stmt  go to state 183
+    stmt           go to state 184
+    if_stmt        go to state 185
+    while_stmt     go to state 186
+    do_while_stmt  go to state 187
+    for_stmt       go to state 188
+    return_stmt    go to state 189
+    break_stmt     go to state 190
+    continue_stmt  go to state 191
+    expr_stmt      go to state 192
+    expr           go to state 193
+    assign_expr    go to state 41
+    ternary_expr   go to state 42
+    or_expr        go to state 43
+    and_expr       go to state 44
+    bitor_expr     go to state 45
+    bitxor_expr    go to state 46
+    bitand_expr    go to state 47
+    eq_expr        go to state 48
+    rel_expr       go to state 49
+    shift_expr     go to state 50
+    add_expr       go to state 51
+    mul_expr       go to state 52
+    unary_expr     go to state 53
+    postfix_expr   go to state 54
+    primary_expr   go to state 55
+
+
+State 170
+
+   19 var_decl: type_spec IDENTIFIER LBRACKET INT_LITERAL RBRACKET OP_ASSIGN LBRACE • arg_list RBRACE SEMICOLON
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    $default  reduce using rule 127 (arg_list)
+
+    expr          go to state 153
+    assign_expr   go to state 41
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+    arg_list      go to state 194
+    arg_list_ne   go to state 155
+
+
+State 171
+
+   73 ternary_expr: or_expr QUESTION expr COLON ternary_expr •
+
+    $default  reduce using rule 73 (ternary_expr)
+
+
+State 172
+
+  130 arg_list_ne: arg_list_ne COMMA expr •
+
+    $default  reduce using rule 130 (arg_list_ne)
+
+
+State 173
+
+   42 if_stmt: KW_IF • LPAREN expr RPAREN stmt
+   43        | KW_IF • LPAREN expr RPAREN stmt KW_ELSE stmt
+
+    LPAREN  shift, and go to state 195
+
+
+State 174
+
+   44 while_stmt: KW_WHILE • LPAREN expr RPAREN stmt
+
+    LPAREN  shift, and go to state 196
+
+
+State 175
+
+   45 do_while_stmt: KW_DO • stmt KW_WHILE LPAREN expr RPAREN SEMICOLON
+
+    KW_INT         shift, and go to state 4
+    KW_FLOAT       shift, and go to state 5
+    KW_CHAR        shift, and go to state 6
+    KW_BOOL        shift, and go to state 7
+    KW_VOID        shift, and go to state 8
+    KW_IF          shift, and go to state 173
+    KW_WHILE       shift, and go to state 174
+    KW_DO          shift, and go to state 175
+    KW_FOR         shift, and go to state 176
+    KW_RETURN      shift, and go to state 177
+    KW_STRUCT      shift, and go to state 56
+    KW_BREAK       shift, and go to state 178
+    KW_CONTINUE    shift, and go to state 179
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+    LBRACE         shift, and go to state 158
+    SEMICOLON      shift, and go to state 181
+
+    type_spec      go to state 63
+    var_decl       go to state 182
+    compound_stmt  go to state 183
+    stmt           go to state 197
+    if_stmt        go to state 185
+    while_stmt     go to state 186
+    do_while_stmt  go to state 187
+    for_stmt       go to state 188
+    return_stmt    go to state 189
+    break_stmt     go to state 190
+    continue_stmt  go to state 191
+    expr_stmt      go to state 192
+    expr           go to state 193
+    assign_expr    go to state 41
+    ternary_expr   go to state 42
+    or_expr        go to state 43
+    and_expr       go to state 44
+    bitor_expr     go to state 45
+    bitxor_expr    go to state 46
+    bitand_expr    go to state 47
+    eq_expr        go to state 48
+    rel_expr       go to state 49
+    shift_expr     go to state 50
+    add_expr       go to state 51
+    mul_expr       go to state 52
+    unary_expr     go to state 53
+    postfix_expr   go to state 54
+    primary_expr   go to state 55
+
+
+State 176
+
+   46 for_stmt: KW_FOR • LPAREN for_init SEMICOLON for_cond SEMICOLON for_incr RPAREN stmt
+
+    LPAREN  shift, and go to state 198
+
+
+State 177
+
+   54 return_stmt: KW_RETURN • expr SEMICOLON
+   55            | KW_RETURN • SEMICOLON
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+    SEMICOLON      shift, and go to state 199
+
+    expr          go to state 200
+    assign_expr   go to state 41
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 178
+
+   56 break_stmt: KW_BREAK • SEMICOLON
+
+    SEMICOLON  shift, and go to state 201
+
+
+State 179
+
+   57 continue_stmt: KW_CONTINUE • SEMICOLON
+
+    SEMICOLON  shift, and go to state 202
+
+
+State 180
+
+   28 compound_stmt: LBRACE stmt_list RBRACE •
+
+    $default  reduce using rule 28 (compound_stmt)
+
+
+State 181
+
+   41 stmt: SEMICOLON •
+
+    $default  reduce using rule 41 (stmt)
+
+
+State 182
+
+   31 stmt: var_decl •
+
+    $default  reduce using rule 31 (stmt)
+
+
+State 183
+
+   39 stmt: compound_stmt •
+
+    $default  reduce using rule 39 (stmt)
+
+
+State 184
+
+   30 stmt_list: stmt_list stmt •
+
+    $default  reduce using rule 30 (stmt_list)
+
+
+State 185
+
+   32 stmt: if_stmt •
+
+    $default  reduce using rule 32 (stmt)
+
+
+State 186
+
+   33 stmt: while_stmt •
+
+    $default  reduce using rule 33 (stmt)
+
+
+State 187
+
+   34 stmt: do_while_stmt •
+
+    $default  reduce using rule 34 (stmt)
+
+
+State 188
+
+   35 stmt: for_stmt •
+
+    $default  reduce using rule 35 (stmt)
+
+
+State 189
+
+   36 stmt: return_stmt •
+
+    $default  reduce using rule 36 (stmt)
+
+
+State 190
+
+   37 stmt: break_stmt •
+
+    $default  reduce using rule 37 (stmt)
+
+
+State 191
+
+   38 stmt: continue_stmt •
+
+    $default  reduce using rule 38 (stmt)
+
+
+State 192
+
+   40 stmt: expr_stmt •
+
+    $default  reduce using rule 40 (stmt)
+
+
+State 193
+
+   58 expr_stmt: expr • SEMICOLON
+
+    SEMICOLON  shift, and go to state 203
+
+
+State 194
+
+   19 var_decl: type_spec IDENTIFIER LBRACKET INT_LITERAL RBRACKET OP_ASSIGN LBRACE arg_list • RBRACE SEMICOLON
+
+    RBRACE  shift, and go to state 204
+
+
+State 195
+
+   42 if_stmt: KW_IF LPAREN • expr RPAREN stmt
+   43        | KW_IF LPAREN • expr RPAREN stmt KW_ELSE stmt
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    expr          go to state 205
+    assign_expr   go to state 41
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 196
+
+   44 while_stmt: KW_WHILE LPAREN • expr RPAREN stmt
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    expr          go to state 206
+    assign_expr   go to state 41
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 197
+
+   45 do_while_stmt: KW_DO stmt • KW_WHILE LPAREN expr RPAREN SEMICOLON
+
+    KW_WHILE  shift, and go to state 207
+
+
+State 198
+
+   46 for_stmt: KW_FOR LPAREN • for_init SEMICOLON for_cond SEMICOLON for_incr RPAREN stmt
+
+    KW_INT         shift, and go to state 4
+    KW_FLOAT       shift, and go to state 5
+    KW_CHAR        shift, and go to state 6
+    KW_BOOL        shift, and go to state 7
+    KW_VOID        shift, and go to state 8
+    KW_STRUCT      shift, and go to state 56
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    $default  reduce using rule 49 (for_init)
+
+    type_spec     go to state 208
+    for_init      go to state 209
+    expr          go to state 210
+    assign_expr   go to state 41
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 199
+
+   55 return_stmt: KW_RETURN SEMICOLON •
+
+    $default  reduce using rule 55 (return_stmt)
+
+
+State 200
+
+   54 return_stmt: KW_RETURN expr • SEMICOLON
+
+    SEMICOLON  shift, and go to state 211
+
+
+State 201
+
+   56 break_stmt: KW_BREAK SEMICOLON •
+
+    $default  reduce using rule 56 (break_stmt)
+
+
+State 202
+
+   57 continue_stmt: KW_CONTINUE SEMICOLON •
+
+    $default  reduce using rule 57 (continue_stmt)
+
+
+State 203
+
+   58 expr_stmt: expr SEMICOLON •
+
+    $default  reduce using rule 58 (expr_stmt)
+
+
+State 204
+
+   19 var_decl: type_spec IDENTIFIER LBRACKET INT_LITERAL RBRACKET OP_ASSIGN LBRACE arg_list RBRACE • SEMICOLON
+
+    SEMICOLON  shift, and go to state 212
+
+
+State 205
+
+   42 if_stmt: KW_IF LPAREN expr • RPAREN stmt
+   43        | KW_IF LPAREN expr • RPAREN stmt KW_ELSE stmt
+
+    RPAREN  shift, and go to state 213
+
+
+State 206
+
+   44 while_stmt: KW_WHILE LPAREN expr • RPAREN stmt
+
+    RPAREN  shift, and go to state 214
+
+
+State 207
+
+   45 do_while_stmt: KW_DO stmt KW_WHILE • LPAREN expr RPAREN SEMICOLON
+
+    LPAREN  shift, and go to state 215
+
+
+State 208
+
+   47 for_init: type_spec • IDENTIFIER OP_ASSIGN expr
+
+    IDENTIFIER  shift, and go to state 216
+
+
+State 209
+
+   46 for_stmt: KW_FOR LPAREN for_init • SEMICOLON for_cond SEMICOLON for_incr RPAREN stmt
+
+    SEMICOLON  shift, and go to state 217
+
+
+State 210
+
+   48 for_init: expr •
+
+    $default  reduce using rule 48 (for_init)
+
+
+State 211
+
+   54 return_stmt: KW_RETURN expr SEMICOLON •
+
+    $default  reduce using rule 54 (return_stmt)
+
+
+State 212
+
+   19 var_decl: type_spec IDENTIFIER LBRACKET INT_LITERAL RBRACKET OP_ASSIGN LBRACE arg_list RBRACE SEMICOLON •
+
+    $default  reduce using rule 19 (var_decl)
+
+
+State 213
+
+   42 if_stmt: KW_IF LPAREN expr RPAREN • stmt
+   43        | KW_IF LPAREN expr RPAREN • stmt KW_ELSE stmt
+
+    KW_INT         shift, and go to state 4
+    KW_FLOAT       shift, and go to state 5
+    KW_CHAR        shift, and go to state 6
+    KW_BOOL        shift, and go to state 7
+    KW_VOID        shift, and go to state 8
+    KW_IF          shift, and go to state 173
+    KW_WHILE       shift, and go to state 174
+    KW_DO          shift, and go to state 175
+    KW_FOR         shift, and go to state 176
+    KW_RETURN      shift, and go to state 177
+    KW_STRUCT      shift, and go to state 56
+    KW_BREAK       shift, and go to state 178
+    KW_CONTINUE    shift, and go to state 179
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+    LBRACE         shift, and go to state 158
+    SEMICOLON      shift, and go to state 181
+
+    type_spec      go to state 63
+    var_decl       go to state 182
+    compound_stmt  go to state 183
+    stmt           go to state 218
+    if_stmt        go to state 185
+    while_stmt     go to state 186
+    do_while_stmt  go to state 187
+    for_stmt       go to state 188
+    return_stmt    go to state 189
+    break_stmt     go to state 190
+    continue_stmt  go to state 191
+    expr_stmt      go to state 192
+    expr           go to state 193
+    assign_expr    go to state 41
+    ternary_expr   go to state 42
+    or_expr        go to state 43
+    and_expr       go to state 44
+    bitor_expr     go to state 45
+    bitxor_expr    go to state 46
+    bitand_expr    go to state 47
+    eq_expr        go to state 48
+    rel_expr       go to state 49
+    shift_expr     go to state 50
+    add_expr       go to state 51
+    mul_expr       go to state 52
+    unary_expr     go to state 53
+    postfix_expr   go to state 54
+    primary_expr   go to state 55
+
+
+State 214
+
+   44 while_stmt: KW_WHILE LPAREN expr RPAREN • stmt
+
+    KW_INT         shift, and go to state 4
+    KW_FLOAT       shift, and go to state 5
+    KW_CHAR        shift, and go to state 6
+    KW_BOOL        shift, and go to state 7
+    KW_VOID        shift, and go to state 8
+    KW_IF          shift, and go to state 173
+    KW_WHILE       shift, and go to state 174
+    KW_DO          shift, and go to state 175
+    KW_FOR         shift, and go to state 176
+    KW_RETURN      shift, and go to state 177
+    KW_STRUCT      shift, and go to state 56
+    KW_BREAK       shift, and go to state 178
+    KW_CONTINUE    shift, and go to state 179
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+    LBRACE         shift, and go to state 158
+    SEMICOLON      shift, and go to state 181
+
+    type_spec      go to state 63
+    var_decl       go to state 182
+    compound_stmt  go to state 183
+    stmt           go to state 219
+    if_stmt        go to state 185
+    while_stmt     go to state 186
+    do_while_stmt  go to state 187
+    for_stmt       go to state 188
+    return_stmt    go to state 189
+    break_stmt     go to state 190
+    continue_stmt  go to state 191
+    expr_stmt      go to state 192
+    expr           go to state 193
+    assign_expr    go to state 41
+    ternary_expr   go to state 42
+    or_expr        go to state 43
+    and_expr       go to state 44
+    bitor_expr     go to state 45
+    bitxor_expr    go to state 46
+    bitand_expr    go to state 47
+    eq_expr        go to state 48
+    rel_expr       go to state 49
+    shift_expr     go to state 50
+    add_expr       go to state 51
+    mul_expr       go to state 52
+    unary_expr     go to state 53
+    postfix_expr   go to state 54
+    primary_expr   go to state 55
+
+
+State 215
+
+   45 do_while_stmt: KW_DO stmt KW_WHILE LPAREN • expr RPAREN SEMICOLON
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    expr          go to state 220
+    assign_expr   go to state 41
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 216
+
+   47 for_init: type_spec IDENTIFIER • OP_ASSIGN expr
+
+    OP_ASSIGN  shift, and go to state 221
+
+
+State 217
+
+   46 for_stmt: KW_FOR LPAREN for_init SEMICOLON • for_cond SEMICOLON for_incr RPAREN stmt
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    $default  reduce using rule 51 (for_cond)
+
+    for_cond      go to state 222
+    expr          go to state 223
+    assign_expr   go to state 41
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 218
+
+   42 if_stmt: KW_IF LPAREN expr RPAREN stmt •
+   43        | KW_IF LPAREN expr RPAREN stmt • KW_ELSE stmt
+
+    KW_ELSE  shift, and go to state 224
+
+    KW_ELSE   [reduce using rule 42 (if_stmt)]
+    $default  reduce using rule 42 (if_stmt)
+
+
+State 219
+
+   44 while_stmt: KW_WHILE LPAREN expr RPAREN stmt •
+
+    $default  reduce using rule 44 (while_stmt)
+
+
+State 220
+
+   45 do_while_stmt: KW_DO stmt KW_WHILE LPAREN expr • RPAREN SEMICOLON
+
+    RPAREN  shift, and go to state 225
+
+
+State 221
+
+   47 for_init: type_spec IDENTIFIER OP_ASSIGN • expr
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    expr          go to state 226
+    assign_expr   go to state 41
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 222
+
+   46 for_stmt: KW_FOR LPAREN for_init SEMICOLON for_cond • SEMICOLON for_incr RPAREN stmt
+
+    SEMICOLON  shift, and go to state 227
+
+
+State 223
+
+   50 for_cond: expr •
+
+    $default  reduce using rule 50 (for_cond)
+
+
+State 224
+
+   43 if_stmt: KW_IF LPAREN expr RPAREN stmt KW_ELSE • stmt
+
+    KW_INT         shift, and go to state 4
+    KW_FLOAT       shift, and go to state 5
+    KW_CHAR        shift, and go to state 6
+    KW_BOOL        shift, and go to state 7
+    KW_VOID        shift, and go to state 8
+    KW_IF          shift, and go to state 173
+    KW_WHILE       shift, and go to state 174
+    KW_DO          shift, and go to state 175
+    KW_FOR         shift, and go to state 176
+    KW_RETURN      shift, and go to state 177
+    KW_STRUCT      shift, and go to state 56
+    KW_BREAK       shift, and go to state 178
+    KW_CONTINUE    shift, and go to state 179
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+    LBRACE         shift, and go to state 158
+    SEMICOLON      shift, and go to state 181
+
+    type_spec      go to state 63
+    var_decl       go to state 182
+    compound_stmt  go to state 183
+    stmt           go to state 228
+    if_stmt        go to state 185
+    while_stmt     go to state 186
+    do_while_stmt  go to state 187
+    for_stmt       go to state 188
+    return_stmt    go to state 189
+    break_stmt     go to state 190
+    continue_stmt  go to state 191
+    expr_stmt      go to state 192
+    expr           go to state 193
+    assign_expr    go to state 41
+    ternary_expr   go to state 42
+    or_expr        go to state 43
+    and_expr       go to state 44
+    bitor_expr     go to state 45
+    bitxor_expr    go to state 46
+    bitand_expr    go to state 47
+    eq_expr        go to state 48
+    rel_expr       go to state 49
+    shift_expr     go to state 50
+    add_expr       go to state 51
+    mul_expr       go to state 52
+    unary_expr     go to state 53
+    postfix_expr   go to state 54
+    primary_expr   go to state 55
+
+
+State 225
+
+   45 do_while_stmt: KW_DO stmt KW_WHILE LPAREN expr RPAREN • SEMICOLON
+
+    SEMICOLON  shift, and go to state 229
+
+
+State 226
+
+   47 for_init: type_spec IDENTIFIER OP_ASSIGN expr •
+
+    $default  reduce using rule 47 (for_init)
+
+
+State 227
+
+   46 for_stmt: KW_FOR LPAREN for_init SEMICOLON for_cond SEMICOLON • for_incr RPAREN stmt
+
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+
+    $default  reduce using rule 53 (for_incr)
+
+    for_incr      go to state 230
+    expr          go to state 231
+    assign_expr   go to state 41
+    ternary_expr  go to state 42
+    or_expr       go to state 43
+    and_expr      go to state 44
+    bitor_expr    go to state 45
+    bitxor_expr   go to state 46
+    bitand_expr   go to state 47
+    eq_expr       go to state 48
+    rel_expr      go to state 49
+    shift_expr    go to state 50
+    add_expr      go to state 51
+    mul_expr      go to state 52
+    unary_expr    go to state 53
+    postfix_expr  go to state 54
+    primary_expr  go to state 55
+
+
+State 228
+
+   43 if_stmt: KW_IF LPAREN expr RPAREN stmt KW_ELSE stmt •
+
+    $default  reduce using rule 43 (if_stmt)
+
+
+State 229
+
+   45 do_while_stmt: KW_DO stmt KW_WHILE LPAREN expr RPAREN SEMICOLON •
+
+    $default  reduce using rule 45 (do_while_stmt)
+
+
+State 230
+
+   46 for_stmt: KW_FOR LPAREN for_init SEMICOLON for_cond SEMICOLON for_incr • RPAREN stmt
+
+    RPAREN  shift, and go to state 232
+
+
+State 231
+
+   52 for_incr: expr •
+
+    $default  reduce using rule 52 (for_incr)
+
+
+State 232
+
+   46 for_stmt: KW_FOR LPAREN for_init SEMICOLON for_cond SEMICOLON for_incr RPAREN • stmt
+
+    KW_INT         shift, and go to state 4
+    KW_FLOAT       shift, and go to state 5
+    KW_CHAR        shift, and go to state 6
+    KW_BOOL        shift, and go to state 7
+    KW_VOID        shift, and go to state 8
+    KW_IF          shift, and go to state 173
+    KW_WHILE       shift, and go to state 174
+    KW_DO          shift, and go to state 175
+    KW_FOR         shift, and go to state 176
+    KW_RETURN      shift, and go to state 177
+    KW_STRUCT      shift, and go to state 56
+    KW_BREAK       shift, and go to state 178
+    KW_CONTINUE    shift, and go to state 179
+    KW_PRINTF      shift, and go to state 23
+    KW_SCANF       shift, and go to state 24
+    INT_LITERAL    shift, and go to state 25
+    BOOL_LITERAL   shift, and go to state 26
+    FLOAT_LITERAL  shift, and go to state 27
+    CHAR_LITERAL   shift, and go to state 28
+    STR_LITERAL    shift, and go to state 29
+    IDENTIFIER     shift, and go to state 30
+    OP_MINUS       shift, and go to state 31
+    OP_MUL         shift, and go to state 32
+    OP_NOT         shift, and go to state 33
+    OP_INC         shift, and go to state 34
+    OP_DEC         shift, and go to state 35
+    OP_BITAND      shift, and go to state 36
+    OP_BITNOT      shift, and go to state 37
+    LPAREN         shift, and go to state 38
+    LBRACE         shift, and go to state 158
+    SEMICOLON      shift, and go to state 181
+
+    type_spec      go to state 63
+    var_decl       go to state 182
+    compound_stmt  go to state 183
+    stmt           go to state 233
+    if_stmt        go to state 185
+    while_stmt     go to state 186
+    do_while_stmt  go to state 187
+    for_stmt       go to state 188
+    return_stmt    go to state 189
+    break_stmt     go to state 190
+    continue_stmt  go to state 191
+    expr_stmt      go to state 192
+    expr           go to state 193
+    assign_expr    go to state 41
+    ternary_expr   go to state 42
+    or_expr        go to state 43
+    and_expr       go to state 44
+    bitor_expr     go to state 45
+    bitxor_expr    go to state 46
+    bitand_expr    go to state 47
+    eq_expr        go to state 48
+    rel_expr       go to state 49
+    shift_expr     go to state 50
+    add_expr       go to state 51
+    mul_expr       go to state 52
+    unary_expr     go to state 53
+    postfix_expr   go to state 54
+    primary_expr   go to state 55
+
+
+State 233
+
+   46 for_stmt: KW_FOR LPAREN for_init SEMICOLON for_cond SEMICOLON for_incr RPAREN stmt •
+
+    $default  reduce using rule 46 (for_stmt)
