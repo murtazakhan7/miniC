@@ -2,15 +2,17 @@
  * main.c — MiniC Compiler Driver
  *
  * Usage:
- *   ./minic <source.c>            — compile and print AST
+ *   ./minic <source.c>            — compile with semantic analysis
  *   ./minic --tokens <source.c>   — print token stream only (lexer mode)
- *   ./minic --ast    <source.c>   — print AST (default)
+ *   ./minic --ast    <source.c>   — print AST + run semantic analysis
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "ast.h"
+#include "semantic.h"
+#include "ir.h"
 
 /* Bison/Flex externals */
 extern FILE    *yyin;
@@ -83,11 +85,12 @@ int main(int argc, char **argv) {
     }
 
     int tokens_only = 0;
+    int print_ast = 0;
     const char *filename = NULL;
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--tokens") == 0) tokens_only = 1;
-        else if (strcmp(argv[i], "--ast") == 0) tokens_only = 0;
+        else if (strcmp(argv[i], "--ast") == 0) { tokens_only = 0; print_ast = 1; }
         else filename = argv[i];
     }
 
@@ -123,10 +126,22 @@ int main(int argc, char **argv) {
             return 1;
         }
 
-        printf("=== Abstract Syntax Tree ===\n");
-        ast_print(ast_root, 0);
+        if (print_ast) {
+            printf("=== Abstract Syntax Tree ===\n");
+            ast_print(ast_root, 0);
+        }
+
+        printf("\n=== Semantic Analysis ===\n");
+        if (semantic_analyze(ast_root) != 0) {
+            ast_free(ast_root);
+            fprintf(stderr, "Compilation failed (semantic errors).\n");
+            return 1;
+        }
+
+        printf("Semantic analysis successful.\n\n");
+        ir_generate(ast_root, stdout);
         ast_free(ast_root);
-        printf("\nParsing successful.\n");
+        printf("\nCompilation successful.\n");
     }
 
     return 0;
