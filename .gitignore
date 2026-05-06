@@ -1,0 +1,25 @@
+# Object files & binaries
+*.o
+/minic
+/minic.exe
+
+# Flex / Bison generated (rebuild with make)
+/lex.yy.c
+/parser.tab.c
+/parser.tab.h
+/parser.output
+
+# Local compiler / test outputs
+/out
+/out.s
+/out.s.log
+/ou
+
+# npm (if present)
+node_modules/
+
+# Editor / local tooling
+.cursor/
+
+# Optional local report; remove this line to track in git
+/MiniC_Compiler_Report.odt
