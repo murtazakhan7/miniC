@@ -12,16 +12,24 @@
 
 ```
 minic/
-├── lexer.l          ← Flex lexical analyzer  (Member 1)
-├── parser.y         ← Bison grammar + AST construction (Member 1)
-├── ast.h            ← AST node definitions, all constructors (Member 1)
-├── ast.c            ← AST constructors, printer, free (Member 1)
-├── main.c           ← Compiler driver: --tokens / --ast modes (Member 1)
-├── Makefile         ← Build system
+├── lexer.l              ← Flex lexical analyzer  (Member 1)
+├── parser.y             ← Bison grammar + AST construction (Member 1)
+├── ast.h / ast.c        ← AST node definitions (Member 1)
+├── semantic.h / semantic.c    ← Semantic analysis (Member 2)
+├── ir.h / ir.c          ← Three-Address Code generation (Member 2)
+├── backend.h / backend.c      ← Structured TAC IR (Member 3)
+├── optimizer.h / optimizer.c  ← Optimization passes (Member 3)
+├── regalloc.h / regalloc.c    ← Register allocation (Member 3)
+├── codegen.c            ← x86 code generation (Member 3)
+├── main.c               ← Compiler driver
+├── Makefile             ← Build system
+├── README.md            ← This file
+├── BACKEND.md           ← Backend architecture docs (Member 3)
 └── tests/
-    ├── test1.c      ← Basic: variables, functions, if/else, printf
-    ├── test2.c      ← Advanced: loops, structs, arrays, bitwise ops
-    └── test3.c      ← Structs, casting, hex/octal literals, member access
+    ├── test1.c          ← Basic: variables, functions, if/else, printf
+    ├── test2.c          ← Advanced: loops, structs, arrays, bitwise ops
+    ├── test3.c          ← Structs, casting, hex/octal literals, member access
+    └── test_opt.c       ← Optimization test cases (Member 3)
 ```
 
 **Generated files (do not edit):**
@@ -558,4 +566,59 @@ L2:
 | Floating point `for` | Works | `float` loop vars parsed correctly |
 
 ---
+
+## 12. Complete Compiler Pipeline
+
+### Overall Flow
+
+```
+Source Code (.c)
+    ↓ [Lexer - Member 1]
+Tokens
+    ↓ [Parser - Member 1]
+Abstract Syntax Tree (AST)
+    ↓ [Semantic Analyzer - Member 2]
+Type-Checked AST
+    ↓ [IR Generator - Member 2]
+Three-Address Code (TAC)
+    ↓ [Optimizer - Member 3]
+Optimized TAC
+    ↓ [Register Allocator - Member 3]
+TAC with Register Assignments
+    ↓ [Code Generator - Member 3]
+x86-64 Assembly
+```
+
+### Member Responsibilities
+
+**Member 1 — Lexer & Parser:**
+- Flex lexical analyzer (`lexer.l`)
+- Bison parser with AST construction (`parser.y`)
+- AST node types and utilities (`ast.h`, `ast.c`)
+
+**Member 2 — Semantic Analysis & TAC:**
+- Semantic analysis pass with type checking and scoping (`semantic.h`, `semantic.c`)
+- IR generation to Three-Address Code (`ir.h`, `ir.c`)
+
+**Member 3 — Optimization & Code Generation:**
+- Structured TAC IR definition (`backend.h`, `backend.c`)
+- Optimization passes: constant folding, dead code elimination, CSE (`optimizer.h`, `optimizer.c`)
+- Register allocation: liveness analysis, linear-scan (`regalloc.h`, `regalloc.c`)
+- x86-64 code generation (`codegen.c`)
+- Comprehensive documentation (`BACKEND.md`)
+
+### Usage
+
+```bash
+./minic source.c                # Full compilation
+./minic --tokens source.c       # Lexer only
+./minic --ast source.c          # Parse and show AST
+make test                       # Run test suite
+```
+
+---
+
+## 13. Backend Architecture (Member 3)
+
+For detailed information on the optimization and code generation backend, see **`BACKEND.md`**.
 

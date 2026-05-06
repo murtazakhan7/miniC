@@ -1,5 +1,5 @@
 
-#line 3 "lex.yy.c"
+#line 2 "lex.yy.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -617,10 +617,10 @@ static void lex_error(const char *msg) {
             line_num, col_num, msg, yytext);
 }
 
-#line 621 "lex.yy.c"
+#line 620 "lex.yy.c"
 /* ── Flex options ─────────────────────────────────────────────────────────── */
 /* ── Named patterns ──────────────────────────────────────────────────────── */
-#line 624 "lex.yy.c"
+#line 623 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -845,7 +845,7 @@ YY_DECL
 
 #line 58 "lexer.l"
  /* ── Comments ─────────────────────────────────────────────────────────── */
-#line 849 "lex.yy.c"
+#line 848 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1326,7 +1326,7 @@ YY_RULE_SETUP
 #line 177 "lexer.l"
 ECHO;
 	YY_BREAK
-#line 1330 "lex.yy.c"
+#line 1329 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 

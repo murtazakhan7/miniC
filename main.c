@@ -13,6 +13,7 @@
 #include "ast.h"
 #include "semantic.h"
 #include "ir.h"
+#include "backend.h"
 
 /* Bison/Flex externals */
 extern FILE    *yyin;
@@ -140,6 +141,12 @@ int main(int argc, char **argv) {
 
         printf("Semantic analysis successful.\n\n");
         ir_generate(ast_root, stdout);
+        
+        /* Run optimization passes on structured TAC */
+        if (ir_tac_program) {
+            tac_optimize(ir_tac_program);
+        }
+        
         ast_free(ast_root);
         printf("\nCompilation successful.\n");
     }

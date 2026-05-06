@@ -3,11 +3,17 @@
 #include <string.h>
 #include <stdarg.h>
 #include "ir.h"
+#include "backend.h"
+
+/* Global TAC program built during generation */
+TACProgram *ir_tac_program = NULL;
 
 typedef struct {
     FILE *out;
     int temp_id;
     int label_id;
+    TACProgram *tac;       /* structured IR accumulator */
+    TACFunc *current_func; /* current function being generated */
 } IRGen;
 
 static char *xstrdup(const char *s) {
@@ -43,6 +49,52 @@ static void emit(IRGen *g, const char *fmt, ...) {
     vfprintf(g->out, fmt, ap);
     va_end(ap);
     fputc('\n', g->out);
+}
+
+/* Emit to structured TAC */
+static void emit_tac_instr(IRGen *g, TACInstr instr) {
+    if (!g->tac || !g->current_func) return;
+    tac_func_add_instr(g->current_func, instr);
+}
+
+static Operand make_operand_const_int(int val) {
+    return (Operand){OPERAND_CONST_INT, {.int_val = val}};
+}
+
+static Operand make_operand_const_float(double val) {
+    return (Operand){OPERAND_CONST_FLOAT, {.float_val = val}};
+}
+
+static Operand make_operand_const_bool(int val) {
+    return (Operand){OPERAND_CONST_BOOL, {.int_val = val ? 1 : 0}};
+}
+
+static Operand make_operand_const_char(char val) {
+    return (Operand){OPERAND_CONST_CHAR, {.int_val = (int)val}};
+}
+
+static Operand make_operand_temp(const char *name) {
+    Operand o = {OPERAND_TEMP, {0}};
+    o.name = (char *)name;
+    return o;
+}
+
+static Operand make_operand_var(const char *name) {
+    Operand o = {OPERAND_VAR, {0}};
+    o.name = (char *)name;
+    return o;
+}
+
+static Operand make_operand_label(const char *name) {
+    Operand o = {OPERAND_LABEL, {0}};
+    o.name = (char *)name;
+    return o;
+}
+
+static Operand make_operand_string(const char *val) {
+    Operand o = {OPERAND_STRING, {0}};
+    o.str_val = (char *)val;
+    return o;
 }
 
 static char *new_temp(IRGen *g) { return str_printf("t%d", g->temp_id++); }
@@ -305,13 +357,31 @@ static void gen_function(IRGen *g, ASTNode *fn) {
 
 void ir_generate(ASTNode *root, FILE *out) {
     if (!root || root->kind != NODE_PROGRAM) return;
+    
+    /* Initialize structured TAC program */
+    ir_tac_program = tac_program_new();
+    
     IRGen g = {0};
     g.out = out;
+    g.tac = ir_tac_program;
+    
     emit(&g, "=== Three Address Code (TAC) ===");
+    
+    /* Process all declarations: globals and functions */
     for (int i = 0; i < root->program.decls->count; i++) {
         ASTNode *d = root->program.decls->items[i];
-        if (d->kind == NODE_FUNC_DEF) gen_function(&g, d);
-        else if (d->kind == NODE_VAR_DECL) gen_var_decl(&g, d);
-        else if (d->kind == NODE_ARRAY_DECL) gen_array_decl(&g, d);
+        if (d->kind == NODE_FUNC_DEF) {
+            g.current_func = tac_program_add_func(g.tac, d->func_def.name, d->func_def.params->count);
+            gen_function(&g, d);
+        } else if (d->kind == NODE_VAR_DECL) {
+            gen_var_decl(&g, d);
+            /* Also add to structured TAC globals */
+            TACInstr instr = {TAC_VAR, d->line, make_operand_var(d->var_decl.name), {0}, {0}, NULL, d->var_decl.arr_size};
+            tac_program_add_global(g.tac, instr);
+        } else if (d->kind == NODE_ARRAY_DECL) {
+            gen_array_decl(&g, d);
+            TACInstr instr = {TAC_VAR, d->line, make_operand_var(d->arr_decl.name), {0}, {0}, NULL, d->arr_decl.size};
+            tac_program_add_global(g.tac, instr);
+        }
     }
 }

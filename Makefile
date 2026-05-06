@@ -19,7 +19,7 @@ BISON_SRC = parser.tab.c
 BISON_HDR = parser.tab.h
 LEX_SRC   = lex.yy.c
 
-SRCS = $(BISON_SRC) $(LEX_SRC) ast.c semantic.c ir.c main.c
+SRCS = $(BISON_SRC) $(LEX_SRC) ast.c semantic.c ir.c backend.c optimizer.c regalloc.c codegen.c main.c
 OBJS = $(SRCS:.c=.o)
 
 TARGET = minic
