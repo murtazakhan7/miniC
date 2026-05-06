@@ -1,19 +1,21 @@
-// test_opt.c — Test constant folding and optimizations
+// test_opt.c — Combined optimization test: CF + DCE + CSE
 
 int main() {
-    // Constant folding opportunity
-    int a = 10 + 5;      // Should fold to 15
-    int b = 3 * 4;       // Should fold to 12
-    int c = 100 / 10;    // Should fold to 10
-    
-    // Comparisons that can fold
-    bool t1 = 5 < 10;    // Should fold to true
-    bool t2 = 15 > 20;   // Should fold to false
-    
-    // Dead code (unused temporaries)
-    int dead = 99;       // unused
-    int x = a + b;
-    
-    printf("%d", x);
+    int x = 1;
+    int y = 2;
+
+    // Constant Folding (CF)
+    int folded = 8 * 4;      // -> 32
+    bool cmp = 10 > 2;       // -> true
+
+    // Common Subexpression Elimination (CSE)
+    int a = x + y;
+    int b = x + y;           // same expression as above
+
+    // Dead Code Elimination (DCE)
+    int dead1 = 123;
+    int dead2 = dead1 + 7;   // never used
+
+    printf("%d", a + b + folded);
     return 0;
 }

@@ -221,45 +221,20 @@ static void operand_print(const Operand *op, FILE *out) {
    TAC Printing (for debugging)
    ========================================================================= */
 
-static const char *tac_op_name(TACOpKind op) {
-    switch (op) {
-    case TAC_VAR: return "var";
-    case TAC_ASSIGN: return "assign";
-    case TAC_ASSIGN_CONST: return "assign_const";
-    case TAC_BINOP: return "binop";
-    case TAC_UNOP: return "unop";
-    case TAC_ARRAY_LOAD: return "array_load";
-    case TAC_ARRAY_STORE: return "array_store";
-    case TAC_MEMBER_LOAD: return "member_load";
-    case TAC_MEMBER_STORE: return "member_store";
-    case TAC_PARAM: return "param";
-    case TAC_CALL: return "call";
-    case TAC_LABEL: return "label";
-    case TAC_JUMP: return "jump";
-    case TAC_COND_JUMP: return "cond_jump";
-    case TAC_RETURN: return "return";
-    case TAC_BREAK: return "break";
-    case TAC_CONTINUE: return "continue";
-    default: return "unknown";
-    }
-}
-
 void tac_print(TACProgram *prog, FILE *out) {
     if (!prog) return;
-    
-    fprintf(out, "=== Structured TAC Program ===\n\n");
-    
+
     /* Print globals */
     if (prog->global_count > 0) {
-        fprintf(out, "=== Global Declarations ===\n");
+        fprintf(out, "globals:\n");
         for (int i = 0; i < prog->global_count; i++) {
             TACInstr *instr = prog->globals[i];
-            fprintf(out, "[%s] ", tac_op_name(instr->op));
             if (instr->op == TAC_VAR) {
+                fprintf(out, "  var ");
                 operand_print(&instr->dest, out);
                 if (instr->attr_int > 0) fprintf(out, "[%d]", instr->attr_int);
+                fprintf(out, "\n");
             }
-            fprintf(out, "\n");
         }
         fprintf(out, "\n");
     }
@@ -271,7 +246,7 @@ void tac_print(TACProgram *prog, FILE *out) {
         
         for (int j = 0; j < func->instr_count; j++) {
             TACInstr *instr = prog->funcs[i]->instrs[j];
-            fprintf(out, "  [%3d] ", j);
+            fprintf(out, "  ");
             
             switch (instr->op) {
             case TAC_VAR:

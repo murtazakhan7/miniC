@@ -1,10 +1,11 @@
-# MiniC Compiler 
+# MiniC Compiler — Member 1 Handoff Documentation
 ## Front-End: Lexical Analyzer + Syntax Analyzer
 
 **Compiler Name:** MiniC  
 **Target Language:** Subset of C  
 **Tools:** Flex (Lexer), Bison (Parser), C (Implementation)  
-
+**Author:** Member 1  
+**Deliverables for Members 2 & 3:** `ast.h`, `ast.c`, `lexer.l`, `parser.y`, `main.c`, `Makefile`
 
 ---
 
@@ -12,24 +13,16 @@
 
 ```
 minic/
-├── lexer.l              ← Flex lexical analyzer  (Member 1)
-├── parser.y             ← Bison grammar + AST construction (Member 1)
-├── ast.h / ast.c        ← AST node definitions (Member 1)
-├── semantic.h / semantic.c    ← Semantic analysis (Member 2)
-├── ir.h / ir.c          ← Three-Address Code generation (Member 2)
-├── backend.h / backend.c      ← Structured TAC IR (Member 3)
-├── optimizer.h / optimizer.c  ← Optimization passes (Member 3)
-├── regalloc.h / regalloc.c    ← Register allocation (Member 3)
-├── codegen.c            ← x86 code generation (Member 3)
-├── main.c               ← Compiler driver
-├── Makefile             ← Build system
-├── README.md            ← This file
-├── BACKEND.md           ← Backend architecture docs (Member 3)
+├── lexer.l          ← Flex lexical analyzer  (Member 1)
+├── parser.y         ← Bison grammar + AST construction (Member 1)
+├── ast.h            ← AST node definitions, all constructors (Member 1)
+├── ast.c            ← AST constructors, printer, free (Member 1)
+├── main.c           ← Compiler driver: --tokens / --ast modes (Member 1)
+├── Makefile         ← Build system
 └── tests/
-    ├── test1.c          ← Basic: variables, functions, if/else, printf
-    ├── test2.c          ← Advanced: loops, structs, arrays, bitwise ops
-    ├── test3.c          ← Structs, casting, hex/octal literals, member access
-    └── test_opt.c       ← Optimization test cases (Member 3)
+    ├── test1.c      ← Basic: variables, functions, if/else, printf
+    ├── test2.c      ← Advanced: loops, structs, arrays, bitwise ops
+    └── test3.c      ← Structs, casting, hex/octal literals, member access
 ```
 
 **Generated files (do not edit):**
@@ -54,12 +47,8 @@ make clean    # removes all generated files
 ### Run
 ```bash
 ./minic --tokens source.c    # print token stream (lexer only mode)
-./minic --ast source.c       # parse and print full AST
-./minic source.c             # semantic + TAC build + TAC optimize + print final TAC
-./minic --emit-ir source.c   # also print pre-optimization IR text
-./minic --no-opt source.c    # skip TAC optimization
-./minic --codegen source.c   # additionally print x86-64 assembly
-./minic --codegen -o out.s source.c  # write pipeline output to out.s (overwrites if exists)
+./minic --ast    source.c    # parse and print full AST (default)
+./minic          source.c    # same as --ast
 ```
 
 ### Run tests
@@ -571,70 +560,12 @@ L2:
 
 ---
 
-## 12. Complete Compiler Pipeline
+## 12. File Change Log
 
-### Overall Flow
-
-```
-Source Code (.c)
-    ↓ [Lexer - Member 1]
-Tokens
-    ↓ [Parser - Member 1]
-Abstract Syntax Tree (AST)
-    ↓ [Semantic Analyzer - Member 2]
-Type-Checked AST
-    ↓ [IR Generator - Member 2]
-Three-Address Code (TAC)
-    ↓ [Optimizer - Member 3]
-Optimized TAC
-    ↓ [Register Allocator - Member 3]
-TAC with Register Assignments
-    ↓ [Code Generator - Member 3]
-x86-64 Assembly
-```
-
-### Member Responsibilities
-
-**Member 1 — Lexer & Parser:**
-- Flex lexical analyzer (`lexer.l`)
-- Bison parser with AST construction (`parser.y`)
-- AST node types and utilities (`ast.h`, `ast.c`)
-
-**Member 2 — Semantic Analysis & TAC:**
-- Semantic analysis pass with type checking and scoping (`semantic.h`, `semantic.c`)
-- IR generation to Three-Address Code (`ir.h`, `ir.c`)
-
-**Member 3 — Optimization & Code Generation:**
-- Structured TAC IR definition (`backend.h`, `backend.c`)
-- Optimization passes: constant folding, dead code elimination, CSE (`optimizer.h`, `optimizer.c`)
-- Register allocation: liveness analysis, linear-scan (`regalloc.h`, `regalloc.c`)
-- x86-64 code generation (`codegen.c`)
-- Comprehensive documentation (`BACKEND.md`)
-
-### Usage
-
-```bash
-./minic source.c                          # Build IR/TAC, optimize TAC, print final TAC
-./minic --tokens source.c                 # Lexer only
-./minic --ast source.c                    # Parse and show AST
-./minic --emit-ir --emit-tac source.c     # Print both IR text and final TAC
-./minic --no-opt --emit-tac source.c      # Print unoptimized TAC
-./minic --codegen source.c                # Run backend code generation (x86-64)
-./minic --codegen -o out.s source.c       # Write output file (overwrite if exists)
-make test                       # Run test suite
-```
-
-Pipeline control flags:
-- `--no-ir` disables IR/TAC/backend pipeline stages
-- `--no-tac` disables TAC optimization/printing/codegen
-- `--no-opt` keeps TAC unoptimized
-- `--emit-ir` prints IR textual stream produced by `ir_generate`
-- `--emit-tac` / `--no-emit-tac` enable/disable final TAC print
-- `--codegen` runs `tac_codegen_x86(...)`
-- `-o <file>` or `--output <file>` writes pipeline output to file (truncate/overwrite mode)
-
----
-
-## 13. Backend Architecture (Member 3)
-
-For detailed information on the optimization and code generation backend, see **`BACKEND.md`**.
+| File | Changes Made |
+|------|-------------|
+| `parser.y` | Fixed `empty_list`→`nl_new`, `list_append`→`nl_append`, `single_list`→`nl_single`; added `do_while_stmt` rule; added `KW_DO` token; added `(type)cast` to `unary_expr`; added proper `%type` for `for_init/cond/incr`; removed unsafe `$<node>` hacks |
+| `lexer.l` | Added `"do"` keyword rule |
+| `main.c` | Added `KW_DO` to `tok_name()` |
+| `ast.h` / `ast.c` | No changes — already correct |
+| `Makefile` | No changes |

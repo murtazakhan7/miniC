@@ -97,6 +97,25 @@ static Operand make_operand_string(const char *val) {
     return o;
 }
 
+static Operand operand_from_text(const char *s) {
+    if (!s) return (Operand){OPERAND_INVALID, {0}};
+    if (s[0] == 't' && s[1] >= '0' && s[1] <= '9') return make_operand_temp(s);
+    if (strcmp(s, "true") == 0) return make_operand_const_bool(1);
+    if (strcmp(s, "false") == 0) return make_operand_const_bool(0);
+    if (s[0] == '"' && s[strlen(s) - 1] == '"') return make_operand_string(s);
+    if (s[0] == '\'' && s[1] != '\0') return make_operand_const_char(s[1]);
+
+    char *end = NULL;
+    long iv = strtol(s, &end, 10);
+    if (end && *end == '\0') return make_operand_const_int((int)iv);
+
+    end = NULL;
+    double fv = strtod(s, &end);
+    if (end && *end == '\0' && strchr(s, '.')) return make_operand_const_float(fv);
+
+    return make_operand_var(s);
+}
+
 static char *new_temp(IRGen *g) { return str_printf("t%d", g->temp_id++); }
 static char *new_label(IRGen *g) { return str_printf("L%d", g->label_id++); }
 
@@ -127,10 +146,14 @@ static char *gen_call(IRGen *g, ASTNode *n) {
     for (int i = 0; i < n->call.args->count; i++) {
         char *arg = gen_expr(g, n->call.args->items[i]);
         emit(g, "param %s", arg);
+        TACInstr p = {TAC_PARAM, n->line, {0}, operand_from_text(arg), {0}, NULL, 0};
+        emit_tac_instr(g, p);
     }
     char *callee = gen_expr(g, n->call.callee);
     char *ret = new_temp(g);
     emit(g, "%s = call %s, %d", ret, callee, n->call.args->count);
+    TACInstr c = {TAC_CALL, n->line, make_operand_temp(ret), {0}, {0}, callee, n->call.args->count};
+    emit_tac_instr(g, c);
     return ret;
 }
 
@@ -213,14 +236,21 @@ static char *gen_expr(IRGen *g, ASTNode *n) {
             strcmp(op, "<<=") == 0 || strcmp(op, ">>=") == 0) {
             char *lv = lvalue_to_str(g, n->binop.left);
             char *rv = gen_expr(g, n->binop.right);
-            if (strcmp(op, "=") == 0) emit(g, "%s = %s", lv, rv);
-            else {
+            if (strcmp(op, "=") == 0) {
+                emit(g, "%s = %s", lv, rv);
+                TACInstr a = {TAC_ASSIGN, n->line, operand_from_text(lv), operand_from_text(rv), {0}, NULL, 0};
+                emit_tac_instr(g, a);
+            } else {
                 char bop[4] = {0};
                 strncpy(bop, op, strlen(op) - 1);
                 emit(g, "%s = %s %s %s", lv, lv, bop, rv);
+                TACInstr b = {TAC_BINOP, n->line, operand_from_text(lv), operand_from_text(lv), operand_from_text(rv), xstrdup(bop), 0};
+                emit_tac_instr(g, b);
             }
             char *ret = new_temp(g);
             emit(g, "%s = %s", ret, lv);
+            TACInstr ret_i = {TAC_ASSIGN, n->line, make_operand_temp(ret), operand_from_text(lv), {0}, NULL, 0};
+            emit_tac_instr(g, ret_i);
             return ret;
         }
 
@@ -228,6 +258,8 @@ static char *gen_expr(IRGen *g, ASTNode *n) {
         char *r = gen_expr(g, n->binop.right);
         char *t = new_temp(g);
         emit(g, "%s = %s %s %s", t, l, op, r);
+        TACInstr b = {TAC_BINOP, n->line, make_operand_temp(t), operand_from_text(l), operand_from_text(r), xstrdup(op), 0};
+        emit_tac_instr(g, b);
         return t;
     }
     default:
@@ -238,12 +270,18 @@ static char *gen_expr(IRGen *g, ASTNode *n) {
 static void gen_var_decl(IRGen *g, ASTNode *n) {
     if (n->var_decl.arr_size > 0) {
         emit(g, "var %s[%d]", n->var_decl.name, n->var_decl.arr_size);
+        TACInstr d = {TAC_VAR, n->line, make_operand_var(n->var_decl.name), {0}, {0}, NULL, n->var_decl.arr_size};
+        emit_tac_instr(g, d);
     } else {
         emit(g, "var %s", n->var_decl.name);
+        TACInstr d = {TAC_VAR, n->line, make_operand_var(n->var_decl.name), {0}, {0}, NULL, 0};
+        emit_tac_instr(g, d);
     }
     if (n->var_decl.init) {
         char *rhs = gen_expr(g, n->var_decl.init);
         emit(g, "%s = %s", n->var_decl.name, rhs);
+        TACInstr a = {TAC_ASSIGN, n->line, make_operand_var(n->var_decl.name), operand_from_text(rhs), {0}, NULL, 0};
+        emit_tac_instr(g, a);
     }
 }
 
@@ -266,8 +304,12 @@ static void gen_stmt(IRGen *g, ASTNode *n) {
         if (n->ret_stmt.value) {
             char *v = gen_expr(g, n->ret_stmt.value);
             emit(g, "return %s", v);
+            TACInstr r = {TAC_RETURN, n->line, {0}, operand_from_text(v), {0}, NULL, 0};
+            emit_tac_instr(g, r);
         } else {
             emit(g, "return");
+            TACInstr r = {TAC_RETURN, n->line, {0}, {0}, {0}, NULL, 0};
+            emit_tac_instr(g, r);
         }
         break;
     case NODE_IF: {

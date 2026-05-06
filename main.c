@@ -2,9 +2,12 @@
  * main.c — MiniC Compiler Driver
  *
  * Usage:
- *   ./minic <source.c>            — compile with semantic analysis
- *   ./minic --tokens <source.c>   — print token stream only (lexer mode)
- *   ./minic --ast    <source.c>   — print AST + run semantic analysis
+ *   ./minic [options] <source.c>
+ *   ./minic --tokens <source.c>                 — print token stream only
+ *   ./minic --ast <source.c>                    — print AST + run semantic analysis
+ *   ./minic --emit-ir --emit-tac <source.c>     — print IR text + final TAC
+ *   ./minic --no-opt --emit-tac <source.c>      — print unoptimized TAC
+ *   ./minic --codegen -o out.s <source.c>       — emit x86 assembly to file
  */
 
 #include <stdio.h>
@@ -81,18 +84,39 @@ static const char *tok_name(int tok) {
 
 int main(int argc, char **argv) {
     if (argc < 2) {
-        fprintf(stderr, "Usage: %s [--tokens|--ast] <source.c>\n", argv[0]);
+        fprintf(stderr, "Usage: %s [options] <source.c>\n", argv[0]);
         return 1;
     }
 
     int tokens_only = 0;
     int print_ast = 0;
+    int build_ir = 1;
+    int build_tac = 1;
+    int optimize_tac = 1;
+    int emit_ir = 0;
+    int emit_tac = 1;
+    int run_codegen = 0;
     const char *filename = NULL;
+    const char *output_path = NULL;
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--tokens") == 0) tokens_only = 1;
         else if (strcmp(argv[i], "--ast") == 0) { tokens_only = 0; print_ast = 1; }
-        else filename = argv[i];
+        else if (strcmp(argv[i], "--emit-ir") == 0) emit_ir = 1;
+        else if (strcmp(argv[i], "--emit-tac") == 0) emit_tac = 1;
+        else if (strcmp(argv[i], "--no-emit-tac") == 0) emit_tac = 0;
+        else if (strcmp(argv[i], "--no-ir") == 0) build_ir = 0;
+        else if (strcmp(argv[i], "--no-tac") == 0) build_tac = 0;
+        else if (strcmp(argv[i], "--no-opt") == 0) optimize_tac = 0;
+        else if (strcmp(argv[i], "--codegen") == 0) run_codegen = 1;
+        else if ((strcmp(argv[i], "-o") == 0 || strcmp(argv[i], "--output") == 0) && i + 1 < argc) {
+            output_path = argv[++i];
+        } else if (argv[i][0] == '-') {
+            fprintf(stderr, "Error: unknown option '%s'\n", argv[i]);
+            return 1;
+        } else {
+            filename = argv[i];
+        }
     }
 
     if (!filename) {
@@ -108,6 +132,22 @@ int main(int argc, char **argv) {
 
     printf("=== MiniC Compiler ===\n");
     printf("Source: %s\n\n", filename);
+
+    if (!build_ir) {
+        build_tac = 0;
+        optimize_tac = 0;
+        run_codegen = 0;
+        emit_tac = 0;
+    }
+    if (!build_tac) {
+        optimize_tac = 0;
+        run_codegen = 0;
+        emit_tac = 0;
+    }
+    if (emit_ir && !build_ir) {
+        fprintf(stderr, "Error: --emit-ir requires IR building\n");
+        return 1;
+    }
 
     if (tokens_only) {
         /* ── Lexer-only mode ── */
@@ -140,11 +180,77 @@ int main(int argc, char **argv) {
         }
 
         printf("Semantic analysis successful.\n\n");
-        ir_generate(ast_root, stdout);
-        
-        /* Run optimization passes on structured TAC */
-        if (ir_tac_program) {
-            tac_optimize(ir_tac_program);
+
+        FILE *pipeline_out = stdout;
+        FILE *asm_out = stdout;
+        char *report_path = NULL;
+
+        if (output_path && run_codegen) {
+            asm_out = fopen(output_path, "w"); /* pure assembly output */
+            if (!asm_out) {
+                perror(output_path);
+                ast_free(ast_root);
+                return 1;
+            }
+
+            if (emit_ir || emit_tac) {
+                size_t report_len = strlen(output_path) + strlen(".log") + 1;
+                report_path = (char *)malloc(report_len);
+                if (!report_path) {
+                    fprintf(stderr, "Error: failed to allocate report path buffer\n");
+                    fclose(asm_out);
+                    ast_free(ast_root);
+                    return 1;
+                }
+                snprintf(report_path, report_len, "%s.log", output_path);
+                pipeline_out = fopen(report_path, "w");
+                if (!pipeline_out) {
+                    perror(report_path);
+                    free(report_path);
+                    fclose(asm_out);
+                    ast_free(ast_root);
+                    return 1;
+                }
+            }
+        } else if (output_path) {
+            pipeline_out = fopen(output_path, "w"); /* overwrite if exists */
+            if (!pipeline_out) {
+                perror(output_path);
+                ast_free(ast_root);
+                return 1;
+            }
+        }
+
+        if (build_ir) {
+            FILE *ir_out = emit_ir ? pipeline_out : tmpfile();
+            ir_generate(ast_root, ir_out ? ir_out : pipeline_out);
+            if (!emit_ir && ir_out) fclose(ir_out);
+        }
+
+        if (build_tac && ir_tac_program) {
+            if (optimize_tac) {
+                tac_optimize(ir_tac_program);
+            }
+            if (emit_tac) {
+                fprintf(pipeline_out, "=== Three Address Code (TAC) — %s ===\n\n",
+                        optimize_tac ? "Optimized" : "Unoptimized");
+                tac_print(ir_tac_program, pipeline_out);
+            }
+        }
+
+        if (run_codegen && ir_tac_program) {
+            tac_codegen_x86(ir_tac_program, asm_out);
+        }
+
+        if (pipeline_out != stdout) {
+            fclose(pipeline_out);
+        }
+        if (asm_out != stdout) {
+            fclose(asm_out);
+        }
+        if (report_path) {
+            printf("Wrote IR/TAC report to %s\n", report_path);
+            free(report_path);
         }
         
         ast_free(ast_root);
