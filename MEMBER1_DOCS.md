@@ -40,15 +40,15 @@ sudo apt install flex bison gcc make
 
 ### Build
 ```bash
-make          # builds ./minic
+make          # builds ./build/minic
 make clean    # removes all generated files
 ```
 
 ### Run
 ```bash
-./minic --tokens source.c    # print token stream (lexer only mode)
-./minic --ast    source.c    # parse and print full AST (default)
-./minic          source.c    # same as --ast
+./build/minic --tokens source.c    # print token stream (lexer only mode)
+./build/minic --ast    source.c    # parse and print full AST (default)
+./build/minic          source.c    # same as --ast
 ```
 
 ### Run tests
@@ -128,7 +128,7 @@ Highest → postfix: []  ()  .  ->  post++  post--
 
 ## 4. Lexer — Sample Output (test1.c)
 
-**Command:** `./minic --tokens tests/test1.c`
+**Command:** `./build/minic --tokens tests/test1.c`
 
 ```
 === MiniC Compiler ===
@@ -214,7 +214,7 @@ LINE  TOKEN                LEXEME
 
 ## 5. Parser — Sample AST Output (test1.c)
 
-**Command:** `./minic --ast tests/test1.c`
+**Command:** `./build/minic --ast tests/test1.c`
 
 ```
 === MiniC Compiler ===

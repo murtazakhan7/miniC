@@ -198,8 +198,8 @@ Liveness / linear-scan toward x86 registers (`eax`, `ecx`, …). Codegen current
 
 | Stage        | Command |
 |-------------|---------|
-| Lexer only  | `./minic --tokens path.c` |
-| Parser/AST  | `./minic --ast path.c` |
-| TAC         | `./minic path.c` ; `./minic --no-opt path.c` |
-| IR text     | `./minic --emit-ir path.c` (when enabled) |
-| Assembly    | `./minic --codegen path.c` ; `./minic --codegen -o out.s path.c` then `gcc -no-pie out.s -o out` |
+| Lexer only  | `./build/minic --tokens path.c` |
+| Parser/AST  | `./build/minic --ast path.c` |
+| TAC         | `./build/minic path.c` ; `./build/minic --no-opt path.c` |
+| IR text     | `./build/minic --emit-ir path.c` (when enabled) |
+| Assembly    | `./build/minic --codegen path.c` ; `./build/minic --codegen -o out.s path.c` then `gcc -no-pie out.s -o out` |

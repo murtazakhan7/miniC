@@ -1,70 +1,82 @@
-# Makefile — MiniC Compiler (Member 1: Lexer + Parser)
+# Makefile — MiniC Compiler
 #
 # Requirements: flex, bison, gcc
 #
+# All generated artifacts go under $(BUILD_DIR)/ (objects, flex/bison output, binary).
+#
 # Targets:
-#   make          — build ./minic
-#   make test     — run all tests in tests/
-#   make tokens   — show token stream for tests/test1.c
-#   make ast      — show AST for tests/test1.c
-#   make clean    — remove generated files
+#   make          — build $(BUILD_DIR)/minic
+#   make test     — run all tests/*.c through the compiler
+#   make tokens   — token stream for tests/test1.c
+#   make ast      — AST for tests/test1.c
+#   make clean    — remove $(BUILD_DIR)/
 
 CC      = gcc
 CFLAGS  = -Wall -Wextra -g
 LEX     = flex
 BISON   = bison
 
-# Generated sources
-BISON_SRC = parser.tab.c
-BISON_HDR = parser.tab.h
-LEX_SRC   = lex.yy.c
+BUILD_DIR = build
 
-SRCS = $(BISON_SRC) $(LEX_SRC) ast.c semantic.c ir.c backend.c optimizer.c regalloc.c codegen.c main.c
-OBJS = $(SRCS:.c=.o)
+MINIC     = $(BUILD_DIR)/minic
 
-TARGET = minic
+# Hand-written sources (project root)
+HAND_SRCS = ast.c semantic.c ir.c backend.c optimizer.c regalloc.c codegen.c main.c
+HAND_OBJS = $(HAND_SRCS:%.c=$(BUILD_DIR)/%.o)
+
+# Flex / Bison outputs live under build/
+BISON_TAB_C  = $(BUILD_DIR)/parser.tab.c
+BISON_TAB_H  = $(BUILD_DIR)/parser.tab.h
+LEX_GEN_C    = $(BUILD_DIR)/lex.yy.c
+GEN_OBJS     = $(BUILD_DIR)/parser.tab.o $(BUILD_DIR)/lex.yy.o
+
+OBJS = $(HAND_OBJS) $(GEN_OBJS)
 
 # ── Default ────────────────────────────────────────────────────────────────
-all: $(TARGET)
+all: $(MINIC)
 
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
+$(MINIC): $(OBJS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $@ $(OBJS)
 
-# ── Code generation ────────────────────────────────────────────────────────
-$(BISON_SRC) $(BISON_HDR): parser.y
-	$(BISON) -d -v parser.y
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
 
-$(LEX_SRC): lexer.l $(BISON_HDR)
-	$(LEX) lexer.l
+# ── Code generation (Bison must run before Flex) ───────────────────────────
+# Grouped targets (&:) so Bison runs once for both .c and .h (GNU Make 4.3+).
+$(BISON_TAB_C) $(BISON_TAB_H) &: parser.y | $(BUILD_DIR)
+	$(BISON) -d -v -o $(BISON_TAB_C) parser.y
+	@mv -f parser.output $(BUILD_DIR)/parser.output 2>/dev/null || true
 
-# ── Compilation ────────────────────────────────────────────────────────────
-%.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+$(LEX_GEN_C): lexer.l $(BISON_TAB_H) | $(BUILD_DIR)
+	$(LEX) -o $@ lexer.l
 
-parser.tab.o: parser.tab.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+# ── Objects from hand-written sources ──────────────────────────────────────
+$(BUILD_DIR)/%.o: %.c $(BISON_TAB_H) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -I$(BUILD_DIR) -I. -c -o $@ $<
 
-lex.yy.o: lex.yy.c
-	$(CC) $(CFLAGS) -Wno-unused-function -c -o $@ $<
+$(BUILD_DIR)/parser.tab.o: $(BISON_TAB_C) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -I$(BUILD_DIR) -I. -c -o $@ $<
 
-# ── Test helpers ───────────────────────────────────────────────────────────
-test: $(TARGET)
+$(BUILD_DIR)/lex.yy.o: $(LEX_GEN_C) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -I$(BUILD_DIR) -I. -Wno-unused-function -c -o $@ $<
+
+# ── Test helpers ──────────────────────────────────────────────────────────
+test: $(MINIC)
 	@echo ""
 	@for f in tests/*.c; do \
 	    echo "=== Testing $$f ==="; \
-	    ./$(TARGET) $$f && echo "PASS: $$f" || echo "FAIL: $$f"; \
+	    $(MINIC) $$f && echo "PASS: $$f" || echo "FAIL: $$f"; \
 	    echo ""; \
 	done
 
-tokens: $(TARGET)
-	./$(TARGET) --tokens tests/test1.c
+tokens: $(MINIC)
+	$(MINIC) --tokens tests/test1.c
 
-ast: $(TARGET)
-	./$(TARGET) --ast tests/test1.c
+ast: $(MINIC)
+	$(MINIC) --ast tests/test1.c
 
-# ── Clean ──────────────────────────────────────────────────────────────────
+# ── Clean ─────────────────────────────────────────────────────────────────
 clean:
-	rm -f $(TARGET) $(OBJS) $(BISON_SRC) $(BISON_HDR) $(LEX_SRC) \
-	      parser.output *.o
+	rm -rf $(BUILD_DIR)
 
 .PHONY: all test tokens ast clean

@@ -1,4 +1,7 @@
 # Object files & binaries
+
+# Build directory (make uses BUILD_DIR=build by default)
+/build/
 *.o
 /minic
 /minic.exe
