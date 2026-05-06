@@ -12,30 +12,56 @@
 
 ```
 minic/
-├── build/               ← `make` output (.o, generated C, `minic` binary)
-├── lexer.l              ← Flex lexical analyzer  (Member 1)
-├── parser.y             ← Bison grammar + AST construction (Member 1)
-├── ast.h / ast.c        ← AST node definitions (Member 1)
-├── semantic.h / semantic.c    ← Semantic analysis (Member 2)
-├── ir.h / ir.c          ← Three-Address Code generation (Member 2)
-├── backend.h / backend.c      ← Structured TAC IR (Member 3)
-├── optimizer.h / optimizer.c  ← Optimization passes (Member 3)
-├── regalloc.h / regalloc.c    ← Register allocation (Member 3)
-├── codegen.c            ← x86 code generation (Member 3)
-├── main.c               ← Compiler driver
-├── Makefile             ← Build system
-├── README.md            ← This file
-├── BACKEND.md           ← Backend architecture docs (Member 3)
+├── .gitignore                  ← Ignores build/, editor junk, local outputs
+├── Makefile                    ← Build system (`BUILD_DIR=build` by default)
+├── package.json                ← Optional Node tooling (not required to build MiniC)
+├── package-lock.json
+│
+├── build/                      ← Created by `make` (gitignored)
+│   ├── minic                   ← Compiler executable
+│   ├── *.o                     ← Object files
+│   ├── parser.tab.c / parser.tab.h   ← Bison from parser.y
+│   ├── parser.output           ← Bison grammar report (with `bison -v`)
+│   └── lex.yy.c                ← Flex from lexer.l
+│
+├── docs/                       ← All project Markdown except this README
+│   ├── ARCHITECTURE.md         ← Frontend / middle-end / backend reference
+│   ├── BACKEND.md              ← Backend design (Member 3)
+│   ├── MEMBER1_DOCS.md         ← Lexer/parser notes (Member 1)
+│   ├── ir_generation.md        ← IR generation notes
+│   ├── semantic_analysis.md    ← Semantic analysis notes
+│   └── SEMANTIC_ANALYSIS.md    ← Additional semantic notes
+│
+├── lexer.l                     ← Flex lexical analyzer (Member 1)
+├── parser.y                    ← Bison grammar + AST (Member 1)
+├── ast.h / ast.c               ← AST definitions (Member 1)
+├── semantic.h / semantic.c     ← Semantic analysis (Member 2)
+├── ir.h / ir.c                 ← TAC / IR generation (Member 2)
+├── backend.h / backend.c       ← Structured TAC IR (Member 3)
+├── optimizer.h / optimizer.c   ← Optimization passes (Member 3)
+├── regalloc.h / regalloc.c     ← Register allocation (Member 3)
+├── codegen.c                   ← x86-64 codegen (Member 3)
+├── main.c                      ← Compiler driver (CLI)
+│
+├── README.md                   ← This file (root overview; all other docs live in docs/)
+│
 └── tests/
-    ├── test1.c          ← Basic: variables, functions, if/else, printf
-    ├── test2.c          ← Advanced: loops, structs, arrays, bitwise ops
-    ├── test3.c          ← Structs, casting, hex/octal literals, member access
-    └── test_opt.c       ← Optimization test cases (Member 3)
+    ├── test1.c                 ← Basic: variables, functions, if/else, printf
+    ├── test2.c                 ← Loops, structs, arrays, bitwise ops
+    ├── test3.c                 ← Structs, casting, hex/octal literals, member access
+    └── test_opt.c              ← Optimization test cases (Member 3)
 ```
 
-**Generated files (do not edit; created under `build/` by `make`):**
-- `build/parser.tab.c` / `build/parser.tab.h` — Bison from `parser.y`
-- `build/lex.yy.c` — Flex from `lexer.l`
+**Generated build artifacts** (under `build/`; do not edit—regenerate with `make`):
+
+| Artifact | Produced by |
+|----------|-------------|
+| `build/parser.tab.c`, `build/parser.tab.h` | Bison from `parser.y` |
+| `build/parser.output` | Bison `-v` (state/grammar report) |
+| `build/lex.yy.c` | Flex from `lexer.l` |
+| `build/*.o`, `build/minic` | Compiler and link step |
+
+Compiler output files (e.g. `out.s`, `out.s.log`) are typically written where you pass `-o`; by default these often land in the project root (see `.gitignore`).
 
 ---
 
@@ -48,8 +74,8 @@ sudo apt install flex bison gcc make
 
 ### Build
 ```bash
-make          # builds ./build/minic
-make clean    # removes all generated files
+make          # builds ./build/minic (and everything under build/)
+make clean    # deletes the entire build/ directory
 ```
 
 ### Run
@@ -610,7 +636,7 @@ x86-64 Assembly
 - Optimization passes: constant folding, dead code elimination, CSE (`optimizer.h`, `optimizer.c`)
 - Register allocation: liveness analysis, linear-scan (`regalloc.h`, `regalloc.c`)
 - x86-64 code generation (`codegen.c`)
-- Comprehensive documentation (`BACKEND.md`)
+- Comprehensive documentation (`docs/BACKEND.md`)
 
 ### Usage
 
@@ -638,4 +664,4 @@ Pipeline control flags:
 
 ## 13. Backend Architecture (Member 3)
 
-For detailed information on the optimization and code generation backend, see **`BACKEND.md`**.
+For detailed information on the optimization and code generation backend, see **[`docs/BACKEND.md`](docs/BACKEND.md)**.
